@@ -57,15 +57,21 @@
 (defn key-pressed
   [state key-details]
   (log/info "key-pressed" key-details)
-  (if-let [direction (direction key-details)]
-    (db/assoc-player-direction state 1 direction))
+  (let [direction (direction key-details)]
+    (cond-> state
+      direction
+      (db/assoc-player-direction 1 direction)))
+
+
   )
 
 (defn key-released
   [state key-details]
   (log/info "key-released" key-details)
-  (if-let [direction (direction key-details)]
-    (db/dissoc-player-direction state 1 direction)))
+  (let [direction (direction key-details)]
+    (cond-> state
+      direction
+      (db/dissoc-player-direction 1 direction))))
 
 ; this function is called in index.html
 (defn ^:export run-sketch []
