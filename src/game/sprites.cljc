@@ -17,7 +17,7 @@
                       :type :spawn-player}))
    :player (fn [state]
              (let [{:keys [tile-size]} (db/gui-info state)
-                   {:keys [x y] } tile-size]
+                   {:keys [x y]} tile-size]
                {:shorthand :p
                 :size tile-size #_{:x (quot x 2) :y (* 3 (quot y 4))}
                 :type :player}))
@@ -42,25 +42,9 @@
 (defn sprite
   [state type]
   ((get sprites type) state))
-#_
-(defn render-tile
-  [im {:keys [type size position] :as tile}]
-  (let [{start-x :x start-y :y} position
-        {width :x height :y} size
-        end-x (+ start-x width)
-        end-y (+ start-y height)
-        colour (case type
-                 :wall :grey
-                 :green)]
-    (doseq [x (range start-x (inc end-x))
-            y (range start-y (inc end-y))]
-      #_(when (= :spawn-player type)
-          (log/info :spawn-player colour x y))
-      (q/set-pixel im x y (apply q/color (get gui/colours colour))))))
 
 (defn draw-brick
   [{:keys [position] :as brick} tile-size]
-  ;(log/info "draw-brick" brick tile-size)
   (let [{:keys [x y]} position]
     (apply q/fill (get gui/colours :brown))
     (q/rect x y tile-size tile-size)))
@@ -71,9 +55,29 @@
         width (quot tile-size 2)
         offset-x (quot tile-size 4)]
     (apply q/fill (get gui/colours :red))
-    (q/rect (+ x offset-x) y width tile-size))
+    (q/rect (+ x offset-x) y width tile-size)))
 
-  #_(let [{:keys [x y]} position
-        {height :y width :x} size]
-    (apply q/fill (get gui/colours :red))
-    (q/rect x y width height)))
+(defn update-player-position
+  [state player-id [x y :as update-vector]]
+  (db/update-player-position state player-id x y)
+  )
+
+(defn update-state
+  [state]
+  (if-let [directions (seq (db/direction-player state 1))]
+    (do
+      (log/info "directions" directions)
+      (reduce (fn [state [player-id player]]
+                (log/info "reduce 1" player-id player)
+                (reduce (fn [state direction]
+                          (let [update-vector (case direction
+                                                :up [0 -1]
+                                                :down [0 1]
+                                                :left [-1 0]
+                                                :right [1 0])]
+                            (update-player-position state player-id update-vector)
+                            )) state directions)
+                #_#_(log/info "update-state" [player-id player])
+                state
+                ) state (db/sprites state :players)))
+    state))

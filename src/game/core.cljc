@@ -18,12 +18,6 @@
         (db/assoc-sprites sprites)
         )))
 
-
-(defn update-state
-  [state]
-  state
-  )
-
 (defn square
   [{:keys [size position colour] :as params}]
 
@@ -50,16 +44,28 @@
 
   )
 
+(defn direction
+  [key-details]
+  (log/info "direction>" key-details)
+  (case (:key key-details)
+    :ArrowUp :up
+    :ArrowDown :down
+    :ArrowLeft :left
+    :ArrowRight :right
+    nil))
+
 (defn key-pressed
-  [& args]
-  (log/info "key-pressed" args)
-  (first args)
+  [state key-details]
+  (log/info "key-pressed" key-details)
+  (if-let [direction (direction key-details)]
+    (db/assoc-player-direction state 1 direction))
   )
 
 (defn key-released
-  [& args]
-  (log/info "key-released" key)
-  args)
+  [state key-details]
+  (log/info "key-released" key-details)
+  (if-let [direction (direction key-details)]
+    (db/dissoc-player-direction state 1 direction)))
 
 ; this function is called in index.html
 (defn ^:export run-sketch []
@@ -69,7 +75,7 @@
                ; setup function called only once, during sketch initialization.
                :setup setup
                ; update-state is called on each iteration before draw-state.
-               :update update-state
+               :update sprites/update-state
                :draw draw-state
                ; This sketch uses functional-mode middleware.
                ; Check quil wiki for more info about middlewares and particularly
