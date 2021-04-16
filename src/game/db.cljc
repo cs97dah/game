@@ -7,7 +7,7 @@
 (defn path-sprite [sprite-type] (conj path-sprites sprite-type))
 (def path-players [:players])
 (defn path-player-id [player-id] (conj path-players player-id))
-(defn path-player-direction[player-id] (conj (path-player-id player-id) :direction))
+(defn path-player-direction [player-id] (conj (path-player-id player-id) :direction))
 
 (defn gui-info
   [state]
@@ -27,23 +27,21 @@
 
 (defn update-player-position
   [state player-id x y]
-  ;(log/info "PLAYER:" player-id  #_ (get-in state (path-player-id player-id)))
   (update-in state [:sprites :players player-id] #(-> %
-                                              (update-in [:position :x] + x)
-                                              (update-in [:position :y] + y)
-                                              ))
-  )
+                                                      (update-in [:position :x] + x)
+                                                      (update-in [:position :y] + y))))
 
 (defn background-image
   [state]
   (get-in state path-background-image))
 
-(defn init-state []
-  (-> {}
-      (assoc-in (conj path-gui-info :map-size) {:x 500 :y 500})
-      (assoc-in (conj path-gui-info :tile-size) 32)))
+(defn init-state
+  [map-width-height tile-width-height ]
+  (assoc-in {} path-gui-info {;; TODO: Make these consistent - either xy pairs or a single int
+                              :map-size {:x map-width-height :y map-width-height}
+                              :tile-size tile-width-height}))
 
-(def  set-conj (fnil conj #{}))
+(def set-conj (fnil conj #{}))
 
 (defn assoc-player-direction
   [state player-id direction]

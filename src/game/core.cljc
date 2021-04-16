@@ -7,11 +7,12 @@
             [clojure.string :as string]
             [game.map.core :as map]
             [game.db :as db]
+            [game.sprites.core :as sprites-core]            ;; TODO: rename to sprites when possible
             [game.sprites :as sprites]))
 
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state)
+  (let [state (db/init-state 500 32 )
         {:keys [background-image sprites]} (map/generate state)]
     (-> state
         (db/assoc-background-image background-image)
@@ -36,8 +37,9 @@
   (q/set-image 0 0 (db/background-image state))
   (let [{:keys [tile-size]} (db/gui-info state)]
     (doseq [brick (db/sprites state :bricks)]
-      (sprites/draw-brick brick tile-size))
-    (doseq [player (vals (db/sprites state :players))]
+      (sprites-core/render brick)
+      )
+  #_  (doseq [player (vals (db/sprites state :players))]
       (sprites/draw-player player tile-size)))
   #_(doseq [p (vals players)]
       (player p))
