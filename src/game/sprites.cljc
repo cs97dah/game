@@ -66,8 +66,14 @@
     (q/rect x y tile-size tile-size)))
 
 (defn draw-player
-  [{:keys [position size] :as player}]
+  [{:keys [position size] :as player} tile-size]
   (let [{:keys [x y]} position
+        width (quot tile-size 2)
+        offset-x (quot tile-size 4)]
+    (apply q/fill (get gui/colours :red))
+    (q/rect (+ x offset-x) y width tile-size))
+
+  #_(let [{:keys [x y]} position
         {height :y width :x} size]
     (apply q/fill (get gui/colours :red))
     (q/rect x y width height)))

@@ -69,7 +69,6 @@
 
 (defn generate
   [state]
-  ;(log/info "generate:" state)
   (let [basic-map (->> basic-map
                        (map seq)
                        (map (partial map (comp keyword #(when-not (string/blank? %) %) str))))
@@ -90,13 +89,6 @@
                      (filter (type= :player))
                      (map-indexed hash-map)
                      (apply merge))]
-    ;(log/info "bricks:" bricks)
-    (-> state
-        (db/assoc-background-image (background-image state))
-        (db/assoc-sprites {:walls (filter (type= :wall) tiles)
-                           :bricks bricks
-                           :players players})
-        )
     {:background-image (background-image state)
      :sprites {:walls (filter (type= :wall) tiles)
                :bricks bricks
