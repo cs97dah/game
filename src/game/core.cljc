@@ -46,7 +46,7 @@
 
 (defn direction
   [key-details]
-  (log/info "direction>" key-details)
+  ;(log/info "direction>" key-details)
   (case (:key key-details)
     :ArrowUp :up
     :ArrowDown :down
@@ -56,7 +56,7 @@
 
 (defn key-pressed
   [state key-details]
-  (log/info "key-pressed" key-details)
+  ;(log/info "key-pressed" key-details)
   (let [direction (direction key-details)]
     (cond-> state
       direction
@@ -67,7 +67,7 @@
 
 (defn key-released
   [state key-details]
-  (log/info "key-released" key-details)
+  ;(log/info "key-released" key-details)
   (let [direction (direction key-details)]
     (cond-> state
       direction

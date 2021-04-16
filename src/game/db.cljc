@@ -27,7 +27,7 @@
 
 (defn update-player-position
   [state player-id x y]
-  (log/info "PLAYER:" player-id  #_ (get-in state (path-player-id player-id)))
+  ;(log/info "PLAYER:" player-id  #_ (get-in state (path-player-id player-id)))
   (update-in state [:sprites :players player-id] #(-> %
                                               (update-in [:position :x] + x)
                                               (update-in [:position :y] + y)

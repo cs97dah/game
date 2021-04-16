@@ -66,9 +66,9 @@
   [state]
   (if-let [directions (seq (db/direction-player state 1))]
     (do
-      (log/info "directions" directions)
+      ;(log/info "directions" directions)
       (reduce (fn [state [player-id player]]
-                (log/info "reduce 1" player-id player)
+                ;         (log/info "reduce 1" player-id player)
                 (reduce (fn [state direction]
                           (let [update-vector (case direction
                                                 :up [0 -1]
