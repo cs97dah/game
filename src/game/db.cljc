@@ -2,6 +2,8 @@
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
+(def path-sprites [:sprites])
+(defn path-sprite [sprite-type] (conj path-sprites sprite-type))
 
 (defn gui-info
   [state]
@@ -10,6 +12,14 @@
 (defn assoc-background-image
   [state image]
   (assoc-in state path-background-image image))
+
+(defn assoc-sprites
+  [state sprites]
+  (assoc-in state path-sprites sprites))
+
+(defn sprites
+  [state sprite-type]
+  (get-in state (path-sprite sprite-type)))
 
 (defn background-image
   [state]

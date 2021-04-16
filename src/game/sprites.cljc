@@ -57,3 +57,12 @@
       #_(when (= :spawn-player type)
         (log/info :spawn-player colour x y))
       (q/set-pixel im x y (apply q/color (get gui/colours colour))))))
+
+(defn draw-brick
+  [{:keys [position size] :as brick}]
+  (let [{:keys [x y]} position
+        {height :y width :x} size]
+    (apply q/fill (get gui/colours :brown))
+    (q/rect x y width height))
+
+  )
