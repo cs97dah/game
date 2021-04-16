@@ -1,4 +1,5 @@
-(ns game.db)
+(ns game.db
+  (:require [taoensso.timbre :as log]))
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
@@ -27,5 +28,5 @@
 
 (defn init-state []
   (-> {}
-      (assoc-in (conj path-gui-info :size) {:x 500 :y 500})
-      (assoc-in (conj path-gui-info :tile-size) {:x 32 :y 32})))
+      (assoc-in (conj path-gui-info :map-size) {:x 500 :y 500})
+      (assoc-in (conj path-gui-info :tile-size) 32)))

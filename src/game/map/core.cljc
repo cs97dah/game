@@ -3,7 +3,8 @@
             [game.sprites :as sprites]
             [game.db :as db]
             [quil.core :as q]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [game.gui :as gui]))
 
 (def basic-map
   "Key:
@@ -34,29 +35,70 @@
   [type]
   #(= type (:type %)))
 
-(defn generate
+(defn draw-map-square
+  [background-image {:keys [size position type] :as tile}]
+  (let [{start-x :x start-y :y} position
+        end-x (+ start-x size)
+        end-y (+ start-y size)
+        colour (case type
+                 :wall :grey
+                 :green)]
+    (doseq [x (range start-x (inc end-x))
+            y (range start-y (inc end-y))]
+      (q/set-pixel background-image x y (apply q/color (get gui/colours colour))))))
+
+(defn background-image
   [state]
   (let [basic-map (->> basic-map
                        (map seq)
                        (map (partial map (comp keyword #(when-not (string/blank? %) %) str))))
         width (-> basic-map first seq count)
         height (-> basic-map count)
-        {image-x :x image-y :y} (:size (db/gui-info state))
+        {:keys [map-size tile-size]} (db/gui-info state)
         tiles (for [y (range height)
                     x (range width)]
                 (let [shorthand (nth (nth basic-map y) x)
                       tile-type (get shorthand->tile-type shorthand)
-                      {{x-size :x y-size :y} :size :as tile-basics} (sprites/sprite state tile-type)]
-                  (assoc tile-basics :position {:x (+ x (* x x-size)) :y (+ y (* y y-size))})))
+                      tile-basics (sprites/sprite state tile-type)]
+                  (assoc tile-basics :position {:x (+ x (* x tile-size)) :y (+ y (* y tile-size))} :size tile-size)))
+         background-image (q/create-image (:x map-size) (:y map-size))]
+    (doseq [tile tiles]
+      (draw-map-square background-image tile))
+    (q/update-pixels background-image)
+    background-image))
+
+(defn generate
+  [state]
+  ;(log/info "generate:" state)
+  (let [basic-map (->> basic-map
+                       (map seq)
+                       (map (partial map (comp keyword #(when-not (string/blank? %) %) str))))
+        width (-> basic-map first seq count)
+        height (-> basic-map count)
+        {:keys [ tile-size]} (db/gui-info state)
+        tiles (for [y (range height)
+                    x (range width)]
+                (let [shorthand (nth (nth basic-map y) x)
+                      tile-type (get shorthand->tile-type shorthand)
+                      tile-basics (sprites/sprite state tile-type)]
+                  (assoc tile-basics :position {:x (+ x (* x tile-size)) :y (+ y (* y tile-size))})))
         bricks (->> tiles
                     (filter (type= :empty-square))
-                    (filter (fn [_] (pos? (rand-int 4)))))]
-    (let [background-image (q/create-image image-x image-y)]
-      ;(log/info "background-image"background-image)
-      (doseq [tile tiles]
-        (sprites/render-tile background-image tile))
-      (q/update-pixels background-image)
-      {:background-image background-image
-       :sprites {:walls (filter (type= :wall) tiles)
-                 :bricks bricks}}))
-  )
+                    (filter (fn [_] (pos? (rand-int 4))))
+                    (into []))
+        players (->> tiles
+                     (filter (type= :player))
+                     (map-indexed hash-map)
+                     (apply merge))]
+    ;(log/info "bricks:" bricks)
+    (-> state
+        (db/assoc-background-image (background-image state))
+        (db/assoc-sprites {:walls (filter (type= :wall) tiles)
+                           :bricks bricks
+                           :players players})
+        )
+    {:background-image (background-image state)
+     :sprites {:walls (filter (type= :wall) tiles)
+               :bricks bricks
+               :players players}}
+    ))

@@ -8,7 +8,7 @@
   {:wall (fn [state]
            (let [{:keys [tile-size]} (db/gui-info state)]
              {:shorthand :w
-              :size tile-size
+              ;  :size tile-sizex
               :type :wall}))
    :spawn-player (fn [state]
                    (let [{:keys [tile-size]} (db/gui-info state)]
@@ -16,10 +16,10 @@
                       :size tile-size
                       :type :spawn-player}))
    :player (fn [state]
-             (let [{:keys [tile-size]} (db/gui-info state)]
+             (let [{:keys [tile-size]} (db/gui-info state)
+                   {:keys [x y] } tile-size]
                {:shorthand :p
-                ;; TODO: This tile size is wrong needs fixing
-                :size {:x (quot tile-size 2) :y (* 3 (quot tile-size 4))}
+                :size tile-size #_{:x (quot x 2) :y (* 3 (quot y 4))}
                 :type :player}))
    ;; Empty squares are empty but can be filled with bricks
    :empty-square (fn [state]
@@ -42,7 +42,7 @@
 (defn sprite
   [state type]
   ((get sprites type) state))
-
+#_
 (defn render-tile
   [im {:keys [type size position] :as tile}]
   (let [{start-x :x start-y :y} position
@@ -55,14 +55,19 @@
     (doseq [x (range start-x (inc end-x))
             y (range start-y (inc end-y))]
       #_(when (= :spawn-player type)
-        (log/info :spawn-player colour x y))
+          (log/info :spawn-player colour x y))
       (q/set-pixel im x y (apply q/color (get gui/colours colour))))))
 
 (defn draw-brick
-  [{:keys [position size] :as brick}]
+  [{:keys [position] :as brick} tile-size]
+  ;(log/info "draw-brick" brick tile-size)
+  (let [{:keys [x y]} position]
+    (apply q/fill (get gui/colours :brown))
+    (q/rect x y tile-size tile-size)))
+
+(defn draw-player
+  [{:keys [position size] :as player}]
   (let [{:keys [x y]} position
         {height :y width :x} size]
-    (apply q/fill (get gui/colours :brown))
-    (q/rect x y width height))
-
-  )
+    (apply q/fill (get gui/colours :red))
+    (q/rect x y width height)))

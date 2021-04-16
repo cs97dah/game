@@ -40,9 +40,13 @@
 
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
-  (doseq [brick (db/sprites state :bricks)]
-    (sprites/draw-brick brick)
-    #_(square brick))
+  ;(log/info "draw-state" (:sprites state))
+  (let [{:keys [tile-size]} (db/gui-info state)]
+    ; (log/info "DRAWING BRICKS:" (db/sprites state :bricks))
+    (doseq [brick (db/sprites state :bricks)]
+      (sprites/draw-brick brick tile-size)))
+  #_(doseq [player (vals (db/sprites state :players))]
+    (sprites/draw-player player))
   #_(doseq [p (vals players)]
       (player p))
 
