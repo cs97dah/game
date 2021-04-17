@@ -19,6 +19,8 @@
 
 (defn update-state
   [state]
+  ;; TODO: This again
+  #_
   (if-let [directions (seq (db/direction-player state 1))]
     (reduce (fn [state [player-id player]]
               (reduce (fn [state direction]
@@ -29,5 +31,8 @@
                                               :right [1 0])]
                           (update-player-position state player-id update-vector)
                           )) state directions)
-              ) state (db/sprites state :players))
-    state))
+              ) state (db/sprites state ))
+    state)
+  state
+  )
+

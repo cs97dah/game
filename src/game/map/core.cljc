@@ -5,6 +5,7 @@
             [game.sprites.wall :as wall]
             [game.sprites.brick :as brick]
             [taoensso.timbre :as log]
+            [game.sprites.player :as player]
             [game.gui :as gui]))
 
 (def basic-map
@@ -76,14 +77,20 @@
          (filter (fn [_] (pos? (rand-int 4))))
          (mapv #(brick/create % tile-size)))))
 
+(defn players
+  [state]
+  (let [{:keys [tile-size]} (db/gui-info state)]
+    (->> (tile-positions state :p)
+         (map-indexed (fn [player-id position]
+                        {player-id (player/create player-id position tile-size)}))
+         (apply merge))))
+
 (defn generate
   [state]
-  (let [{:keys [tile-size]} (db/gui-info state)
-        walls (walls state)
-        bricks (bricks state)]
+  (let [walls (walls state)
+        bricks (bricks state)
+        players (players state)]
     {:background-image (background-image state walls)
      :sprites {:walls walls
                :bricks bricks
-               ;  :players players
-               }}
-    ))
+               :players players}}))

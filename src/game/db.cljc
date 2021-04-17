@@ -4,8 +4,8 @@
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
 (def path-sprites [:sprites])
-(defn path-sprite [sprite-type] (conj path-sprites sprite-type))
-(def path-players [:players])
+(def path-bricks (conj path-sprites :bricks))
+(def path-players (conj path-sprites :players))
 (defn path-player-id [player-id] (conj path-players player-id))
 (defn path-player-direction [player-id] (conj (path-player-id player-id) :direction))
 
@@ -22,8 +22,12 @@
   (assoc-in state path-sprites sprites))
 
 (defn sprites
-  [state sprite-type]
-  (get-in state (path-sprite sprite-type)))
+  "Return all sprites that need to be rendered"
+  [state ]
+  ;(log/info "sprites, players:" (vals (get-in state path-players)))
+  (concat (get-in state path-bricks)
+          (vals (get-in state path-players))
+          ))
 
 (defn update-player-position
   [state player-id x y]

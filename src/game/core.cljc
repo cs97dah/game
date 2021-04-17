@@ -18,7 +18,7 @@
         (db/assoc-background-image background-image)
         (db/assoc-sprites sprites)
         )))
-
+#_
 (defn square
   [{:keys [size position colour] :as params}]
 
@@ -28,23 +28,16 @@
     (apply q/fill (get gui/colours colour))
     (q/rect x y width height))
   )
-
+#_
 (defn player [{:keys [size position colour] :as player}]
   (square player)
   )
 
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
-  (let [{:keys [tile-size]} (db/gui-info state)]
-    (doseq [brick (db/sprites state :bricks)]
-      (sprites-core/render brick)
-      )
-  #_  (doseq [player (vals (db/sprites state :players))]
-      (sprites/draw-player player tile-size)))
-  #_(doseq [p (vals players)]
-      (player p))
-
-  )
+  (doseq [sprite (db/sprites state)]
+    (sprites-core/render sprite)
+    ))
 
 (defn direction
   [key-details]

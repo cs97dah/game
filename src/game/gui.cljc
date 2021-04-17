@@ -11,3 +11,7 @@
               :red [154 41 15]
               :grey [209 226 240]
               :brown [122 68 25]})
+
+(defn colour
+  [colour]
+  (get colours colour))

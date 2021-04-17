@@ -15,7 +15,6 @@
 
 (defn create
   [position tile-size]
-  (log/info "create wall" position tile-size)
   (map->Wall {:position position
               :size {:x tile-size
                      :y tile-size}}))
