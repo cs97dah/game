@@ -37,14 +37,14 @@
   [sprite sprites]
   (reduce (fn [_ solid-object]
             (if (sprites-intersect? sprite solid-object)
-              (reduced solid-object)
+              (reduced true)
               false)) nil sprites))
 
 (defn can-move?
   [state player proposed-move]
-  (let [bomb-player-is-on (sprite-intersects? player (db/bombs state))
+  (let [bombs-player-is-already-on (filter #(sprites-intersect? player %) (db/bombs state))
         solid-objects (concat (db/bricks state)
                               (db/walls state)
-                              (disj (db/bombs state) bomb-player-is-on))
+                              (apply disj (db/bombs state) bombs-player-is-already-on))
         proposed-player (update-position player proposed-move)]
     (not (sprite-intersects? proposed-player solid-objects))))

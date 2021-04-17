@@ -32,7 +32,7 @@
                                                             (reduced key))) nil %))))
 
 (defrecord Player
-  [position size player-id]
+  [position size player-id bomb-strength]
   sprites/Sprite
 
   (render [_]
@@ -50,7 +50,8 @@
     (map->Player {:position position
                   :size {:x width
                          :y height}
-                  :player-id player-id})))
+                  :player-id player-id
+                  :bomb-strength 1})))
 
 (defn player-commands
   [state player-id]
