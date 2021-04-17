@@ -6,7 +6,8 @@
             [game.sprites.brick :as brick]
             [taoensso.timbre :as log]
             [game.sprites.player :as player]
-            [game.gui :as gui]))
+            [game.gui :as gui]
+            [medley.core :as medley]))
 
 (def basic-map
   "Key:
@@ -45,10 +46,12 @@
 
 (defn background-image
   [state walls]
-  (let [{:keys [map-size]} (db/gui-info state)
-        background-image (q/create-image (:x map-size) (:y map-size))]
-    (doseq [x (range (:x map-size))
-            y (range (:y map-size))]
+  (let [{:keys [ tile-size]} (db/gui-info state)
+        image-width (* tile-size (inc tiles-wide))
+        image-height(* tile-size (inc tiles-high))
+        background-image (q/create-image image-width image-height )]
+    (doseq [x (range image-width)
+            y (range image-height)]
       (q/set-pixel background-image x y (apply q/color (get gui/colours :green))))
     (doseq [wall walls]
       (paint-wall background-image wall))
@@ -63,7 +66,8 @@
             x (range tiles-wide)
             :let [shorthand (nth (nth basic-map y) x)]
             :when (= expected-shorthand shorthand)]
-        {:x (+ x (* x tile-size)) :y (+ y (* y tile-size))}))))
+        {:x (+ x (* x tile-size))
+         :y (+ y (* y tile-size))}))))
 
 (defn walls
   [state]
@@ -92,5 +96,14 @@
         players (players state)]
     {:background-image (background-image state walls)
      :sprites {:walls walls
-               :bricks bricks
-               :players players}}))
+               :bricks bricks}
+     :players players}))
+
+(defn move-players
+  [state]
+  (reduce #(player/move-player %1 %2) state (vals (db/players state))))
+
+(defn update-state
+  [state]
+  (-> state
+      (move-players)))

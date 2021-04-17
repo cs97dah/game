@@ -7,66 +7,35 @@
             [clojure.string :as string]
             [game.map.core :as map]
             [game.db :as db]
+            [game.sprites.player :as player]
             [game.sprites.core :as sprites-core]            ;; TODO: rename to sprites when possible
-            [game.sprites :as sprites]))
+            ))
 
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state 500 32 )
-        {:keys [background-image sprites]} (map/generate state)]
+  (let [state (db/init-state 500 32)
+        {:keys [background-image sprites players]} (map/generate state)]
     (-> state
         (db/assoc-background-image background-image)
         (db/assoc-sprites sprites)
-        )))
-#_
-(defn square
-  [{:keys [size position colour] :as params}]
-
-
-  (let [{:keys [x y]} position
-        {height :y width :x} size]
-    (apply q/fill (get gui/colours colour))
-    (q/rect x y width height))
-  )
-#_
-(defn player [{:keys [size position colour] :as player}]
-  (square player)
-  )
+        (db/assoc-players players))))
 
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
   (doseq [sprite (db/sprites state)]
-    (sprites-core/render sprite)
-    ))
-
-(defn direction
-  [key-details]
-  ;(log/info "direction>" key-details)
-  (case (:key key-details)
-    :ArrowUp :up
-    :ArrowDown :down
-    :ArrowLeft :left
-    :ArrowRight :right
-    nil))
+    (sprites-core/render sprite)))
 
 (defn key-pressed
   [state key-details]
-  ;(log/info "key-pressed" key-details)
-  (let [direction (direction key-details)]
+  (let [key (-> key-details :key player/relevant-keys)]
+    ; (log/info "key pressed" key)
     (cond-> state
-      direction
-      (db/assoc-player-direction 1 direction)))
-
-
-  )
+      key
+      (db/assoc-key-pressed  key))))
 
 (defn key-released
   [state key-details]
-  ;(log/info "key-released" key-details)
-  (let [direction (direction key-details)]
-    (cond-> state
-      direction
-      (db/dissoc-player-direction 1 direction))))
+  (db/dissoc-key-pressed state (:key key-details)))
 
 ; this function is called in index.html
 (defn ^:export run-sketch []
@@ -76,7 +45,7 @@
                ; setup function called only once, during sketch initialization.
                :setup setup
                ; update-state is called on each iteration before draw-state.
-               :update sprites/update-state
+               :update map/update-state
                :draw draw-state
                ; This sketch uses functional-mode middleware.
                ; Check quil wiki for more info about middlewares and particularly
