@@ -103,7 +103,14 @@
   [state]
   (reduce #(player/move-player %1 %2) state (vals (db/players state))))
 
+(defn lay-bombs
+  [state]
+  (reduce #(player/lay-bomb %1 %2) state (vals (db/players state)))
+  )
+
 (defn update-state
   [state]
   (-> state
-      (move-players)))
+      (move-players)
+      (lay-bombs)
+      ))

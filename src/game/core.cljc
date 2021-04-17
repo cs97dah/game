@@ -20,15 +20,24 @@
         (db/assoc-sprites sprites)
         (db/assoc-players players))))
 
+(defn render
+  [sprites]
+  (doseq [sprite sprites]
+    (sprites-core/render sprite)))
+
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
-  (doseq [sprite (db/sprites state)]
-    (sprites-core/render sprite)))
+  (let [bricks (db/bricks state)
+        players (vals (db/players state))
+        bombs (db/bombs state)]
+    (render bricks)
+    (render bombs)
+    (render players)))
 
 (defn key-pressed
   [state key-details]
+  (log/info "key pressed" key-details)
   (let [key (-> key-details :key player/relevant-keys)]
-    ; (log/info "key pressed" key)
     (cond-> state
       key
       (db/assoc-key-pressed  key))))

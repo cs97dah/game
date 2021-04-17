@@ -7,6 +7,7 @@
 (def path-bricks (conj path-sprites :bricks))
 (def path-walls (conj path-sprites :walls))
 (def path-players [:players])
+(def path-bombs [:bombs])
 (defn path-player-id [player-id] (conj path-players player-id))
 (def path-keys-pressed [:keys-pressed])
 
@@ -30,7 +31,11 @@
   [state]
   (get-in state path-players))
 
-(defn sprites
+(defn bricks
+  [state]
+  (get-in state path-bricks))
+
+#_(defn sprites
   "Return all sprites (including players) that need to be rendered"
   [state ]
   (concat (get-in state path-bricks)
@@ -42,8 +47,8 @@
 
 (defn init-state
   [map-width-height tile-width-height ]
-  (assoc-in {} path-gui-info {;; TODO: Make these consistent - either xy pairs or a single int
-                              :map-size {:x map-width-height :y map-width-height}
+  (assoc-in {} path-gui-info {:map-size {:x map-width-height :y map-width-height}
+                              ;; TODO: tile size should be xy pair like everything else
                               :tile-size tile-width-height}))
 
 (def set-conj (fnil conj #{}))
@@ -59,3 +64,15 @@
 (defn keys-pressed
   [state]
   (get-in state path-keys-pressed))
+
+(defn player
+  [state player-id]
+  (get-in state (path-player-id player-id)))
+
+(defn bombs
+  [state]
+  (get-in state path-bombs))
+
+(defn assoc-bomb
+  [state bomb]
+  (update-in state path-bombs set-conj bomb))
