@@ -19,7 +19,7 @@
     (< bottom-of-a top-of-b)))
 
 (defn is-left?
-  "True is a is to the left of b"
+  "True if a is to the left of b"
   [sprite-a sprite-b]
   (let [right-of-a (+ (get-in sprite-a [:position :x]) (get-in sprite-a [:size :x]))
         left-of-b (get-in sprite-b [:position :x])]
@@ -37,12 +37,14 @@
   [sprite sprites]
   (reduce (fn [_ solid-object]
             (if (sprites-intersect? sprite solid-object)
-              (reduced true)
+              (reduced solid-object)
               false)) nil sprites))
 
 (defn can-move?
   [state player proposed-move]
-  (let [solid-objects (concat (get-in state db/path-bricks)
-                              (get-in state db/path-walls))
+  (let [bomb-player-is-on (sprite-intersects? player (db/bombs state))
+        solid-objects (concat (db/bricks state)
+                              (db/walls state)
+                              (disj (db/bombs state) bomb-player-is-on))
         proposed-player (update-position player proposed-move)]
     (not (sprite-intersects? proposed-player solid-objects))))

@@ -35,6 +35,10 @@
   [state]
   (get-in state path-bricks))
 
+(defn walls
+  [state]
+  (get-in state path-walls))
+
 #_(defn sprites
   "Return all sprites (including players) that need to be rendered"
   [state ]
