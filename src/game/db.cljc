@@ -5,9 +5,9 @@
 (def path-background-image (conj path-gui-info :background-image))
 (def path-sprites [:sprites])
 (def path-bricks (conj path-sprites :bricks))
+(def path-walls (conj path-sprites :walls))
 (def path-players [:players])
 (defn path-player-id [player-id] (conj path-players player-id))
-(defn path-player-direction [player-id] (conj (path-player-id player-id) :direction))
 (def path-keys-pressed [:keys-pressed])
 
 (defn gui-info
@@ -36,12 +36,6 @@
   (concat (get-in state path-bricks)
           (vals (players state))))
 
-(defn update-player-position
-  [state player-id x y]
-  (update-in state [:sprites :players player-id] #(-> %
-                                                      (update-in [:position :x] + x)
-                                                      (update-in [:position :y] + y))))
-
 (defn background-image
   [state]
   (get-in state path-background-image))
@@ -53,27 +47,13 @@
                               :tile-size tile-width-height}))
 
 (def set-conj (fnil conj #{}))
-;
-;(defn assoc-player-direction
-;  [state player-id direction]
-;  (update-in state (path-player-direction player-id) set-conj direction))
-;
-;(defn dissoc-player-direction
-;  [state player-id direction]
-;  (update-in state (path-player-direction player-id) disj direction))
-;
-;(defn direction-player
-;  [state player-id]
-;  (get-in state (path-player-direction player-id)))
 
 (defn assoc-key-pressed
   [state key]
-  ;(log/info "assoc-key-pressed" key)
   (update-in state path-keys-pressed set-conj key))
 
 (defn dissoc-key-pressed
   [state key]
-  ; (log/info "dissoc-key-pressed" key)
   (update-in state path-keys-pressed disj key))
 
 (defn keys-pressed

@@ -55,17 +55,22 @@
     (vals directions-for-keys)))
 
 (def move-vectors
-  {:up [0 -2]
-   :down [0 2]
-   :left [-2 0]
-   :right [2 0]})
+  {:up [0 -1]
+   :down [0 1]
+   :left [-1 0]
+   :right [1 0]})
 
 (defn move-player*
   [state player-id direction]
-  (let [[x y] (get move-vectors direction)]
-    (-> state
-        (update-in (conj (db/path-player-id player-id) :position :x) + x)
-        (update-in (conj (db/path-player-id player-id) :position :y) + y))))
+  (let [[x y :as proposed-move] (get move-vectors direction)
+        player (get-in state (db/path-player-id player-id))]
+    (log/info "move-player*"player)
+    ;; TODO: Use update-position in sprite.core
+    (cond-> state
+      (sprites/can-move? state player proposed-move)
+      (->
+          (update-in (conj (db/path-player-id player-id) :position :x) + x)
+          (update-in (conj (db/path-player-id player-id) :position :y) + y)))))
 
 (defn move-player
   [state {:keys [player-id] :as player}]
