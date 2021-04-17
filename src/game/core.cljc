@@ -14,10 +14,11 @@
 (defn setup []
   (q/frame-rate 30)
   (let [state (db/init-state 500 32)
-        {:keys [background-image sprites players]} (map/generate state)]
+        {:keys [background-image walls bricks players]} (map/generate state)]
     (-> state
         (db/assoc-background-image background-image)
-        (db/assoc-sprites sprites)
+        (db/assoc-walls walls)
+        (db/assoc-bricks bricks)
         (db/assoc-players players))))
 
 (defn render

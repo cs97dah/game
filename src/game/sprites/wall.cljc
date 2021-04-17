@@ -5,7 +5,7 @@
             [taoensso.timbre :as log]))
 
 (defrecord Wall
-  [position size]
+  [position size coordinates]
   sprites/Sprite
 
   (render [_]
@@ -17,4 +17,7 @@
   [position tile-size]
   (map->Wall {:position position
               :size {:x tile-size
-                     :y tile-size}}))
+                     :y tile-size}
+              :coordinates (-> position
+                                 (update :x quot tile-size)
+                                 (update :y quot tile-size))}))

@@ -9,7 +9,7 @@
 (def bomb-explode-millis 4000)
 
 (defrecord Bomb
-  [position size bomb-explodes-at bomb-strength]
+  [position size bomb-explodes-at bomb-strength coordinates]
   sprites/Sprite
 
   (render [_]
@@ -19,10 +19,13 @@
       (q/ellipse x y (:x size) (:y size)))))
 
 (defn create
-  [state {:keys [bomb-strength] :as player} position-and-size]
+  [state {:keys [bomb-strength] :as player} {:keys [position size] :as position-and-size}]
   (map->Bomb (assoc position-and-size
                     :bomb-explodes-at (db/game-time-plus-millis state bomb-explode-millis)
-                    :bomb-strength bomb-strength)))
+                    :bomb-strength bomb-strength
+                    :coordinates (-> position
+                                     (update :x quot (:x size))
+                                     (update :y quot (:y size))))))
 
 (defn explode-bomb
   [state bomb]

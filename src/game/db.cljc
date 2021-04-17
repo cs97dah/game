@@ -3,9 +3,10 @@
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
-(def path-sprites [:sprites])
-(def path-bricks (conj path-sprites :bricks))
-(def path-walls (conj path-sprites :walls))
+(def path-bricks [:bricks])
+(def path-bricks-by-coordinates [:bricks-by-coords])
+(def path-walls [:walls])
+(def path-walls-by-coordinates [:walls-by-coords])
 (def path-players [:players])
 (def path-bombs [:bombs])
 (def path-explosions [:explosions])
@@ -20,9 +21,33 @@
   [state image]
   (assoc-in state path-background-image image))
 
-(defn assoc-sprites
-  [state sprites]
-  (assoc-in state path-sprites sprites))
+(defn assoc-wall-by-coordinates
+  [state {:keys [coordinates] :as wall}]
+  (assoc-in state (conj path-walls-by-coordinates coordinates) wall))
+
+(defn assoc-walls
+  [state walls]
+  (let [state (assoc-in state path-walls walls)]
+    ;; TODO: Can the above be scrapped to just have this instead?
+    (reduce assoc-wall-by-coordinates state walls)))
+
+(defn wall-at?
+  [state coordinates]
+  (get-in state (conj path-walls-by-coordinates coordinates)))
+
+(defn assoc-brick-by-coordinates
+  [state {:keys [coordinates] :as brick}]
+  (assoc-in state (conj path-bricks-by-coordinates coordinates) brick))
+
+(defn assoc-bricks
+  [state bricks]
+  (let [state (assoc-in state path-bricks bricks)]
+    ;; TODO: Can the above be scrapped to just have this instead?
+    (reduce assoc-brick-by-coordinates state bricks)))
+
+(defn brick-at?
+  [state coordinates]
+  (get-in state (conj path-bricks-by-coordinates coordinates)))
 
 (defn assoc-players
   [state players]
@@ -39,12 +64,6 @@
 (defn walls
   [state]
   (get-in state path-walls))
-
-#_(defn sprites
-  "Return all sprites (including players) that need to be rendered"
-  [state ]
-  (concat (get-in state path-bricks)
-          (vals (players state))))
 
 (defn background-image
   [state]

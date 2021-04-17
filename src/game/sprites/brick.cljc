@@ -4,7 +4,7 @@
             [quil.core :as q]))
 
 (defrecord Brick
-  [position size]
+  [position size coordinates]
   sprites/Sprite
 
   (render [_]
@@ -16,4 +16,7 @@
   [position tile-size]
   (map->Brick {:position position
                :size {:x tile-size
-                      :y tile-size}}))
+                      :y tile-size}
+               :coordinates (-> position
+                                (update :x quot tile-size)
+                                (update :y quot tile-size))}))

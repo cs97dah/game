@@ -38,7 +38,6 @@
   [background-image {:keys [size position] :as wall}]
   (let [{start-x :x start-y :y} position
         {size-x :x size-y :y} size
-
         end-x (+ start-x size-x)
         end-y (+ start-y size-y)]
     (doseq [x (range start-x (inc end-x))
@@ -96,8 +95,8 @@
         bricks (bricks state)
         players (players state)]
     {:background-image (background-image state walls)
-     :sprites {:walls walls
-               :bricks bricks}
+     :walls walls
+     :bricks bricks
      :players players}))
 
 (defn move-players
@@ -117,9 +116,6 @@
   (let [current-time (db/game-time state)
         exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))
         extinguished-explosions (filter #(< (:extinguishes-at %) current-time) (db/explosions state))]
-    ;(log/info "(db/explosions state)" (db/explosions state))
-    ;(log/info "extinguished-explosions" (into [] extinguished-explosions))
-    ;(log/info "current-time" current-time)
     (-> state
         (move-players)
         (lay-bombs)
