@@ -9,6 +9,7 @@
 
                  [medley "1.3.0"]
                  [com.taoensso/timbre "4.10.0"]
+                 ;[org.clojure/core.async "1.3.610"]
 
                  ]
 

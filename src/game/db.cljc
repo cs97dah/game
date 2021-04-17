@@ -76,3 +76,18 @@
 (defn assoc-bomb
   [state bomb]
   (update-in state path-bombs set-conj bomb))
+
+(defn game-time
+  [state]
+  ;; TODO: Keep a game time in state
+  #?(:clj  (System/currentTimeMillis)
+     :cljs (.getTime (js/Date.))))
+
+(defn game-time-plus-millis
+  [state millis]
+  (log/info "game-time-plus-millis"(+ (game-time state) millis))
+  (+ (game-time state) millis))
+
+(defn remove-bomb
+  [state bomb]
+  (update-in state path-bombs disj bomb))

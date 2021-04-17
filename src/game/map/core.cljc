@@ -108,9 +108,16 @@
   (reduce #(player/lay-bomb %1 %2) state (vals (db/players state)))
   )
 
+(defn remove-exploded-bombs
+  [state exploded-bombs]
+  (reduce #(db/remove-bomb %1 %2) state exploded-bombs))
+
 (defn update-state
   [state]
-  (-> state
-      (move-players)
-      (lay-bombs)
-      ))
+  (let [current-time (db/game-time state)
+        exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))]
+    (-> state
+        (move-players)
+        (lay-bombs)
+        (remove-exploded-bombs exploded-bombs)
+        )))

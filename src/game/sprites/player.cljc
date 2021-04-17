@@ -94,18 +94,12 @@
 
 (defn laying-bomb?
   [state player-id]
-  (let [r
-        (:bomb (player-commands state player-id))]
-    (log/info "laying-bomb?"r )
-    r))
+  (:bomb (player-commands state player-id)))
 
 (defn can-lay-bomb?
   [state proposed-bomb-position-and-size]
-  (let [bombs (db/bombs state)
-        can-lay-bomb? (not (sprites/sprite-intersects? proposed-bomb-position-and-size bombs))]
-    (log/info "can-lay-bomb?" can-lay-bomb?)
-    can-lay-bomb?
-    ))
+  (let [bombs (db/bombs state)]
+    (not (sprites/sprite-intersects? proposed-bomb-position-and-size bombs))))
 
 (defn lay-bomb*
   [state {:keys [player-id] :as player}]
@@ -113,7 +107,7 @@
         proposed-bomb-position-and-size (proposed-bomb-position-and-size state player)]
     (-> (cond-> state
           (can-lay-bomb? state proposed-bomb-position-and-size)
-          (db/assoc-bomb (bomb/create proposed-bomb-position-and-size)))
+          (db/assoc-bomb (bomb/create state proposed-bomb-position-and-size)))
         (db/dissoc-key-pressed (bomb-key-for-player player-id)))))
 
 (defn lay-bomb

@@ -36,7 +36,6 @@
 
 (defn key-pressed
   [state key-details]
-  (log/info "key pressed" key-details)
   (let [key (-> key-details :key player/relevant-keys)]
     (cond-> state
       key
