@@ -32,13 +32,15 @@
                                                             (reduced key))) nil %))))
 
 (defrecord Player
-  [position size player-id bomb-strength]
+  [position size player-id bomb-strength dead?]
   sprites/Sprite
 
   (render [_]
-    (let [{:keys [x y]} position]
-      (apply q/fill (get player-colours player-id))
-      (q/rect x y (:x size) (:y size)))))
+    ;; TODO: Render something when the player is dead
+    (when-not dead?
+      (let [{:keys [x y]} position]
+        (apply q/fill (get player-colours player-id))
+        (q/rect x y (:x size) (:y size))))))
 
 (defn create
   [player-id position tile-size]
@@ -116,3 +118,11 @@
   (cond-> state
     (laying-bomb? state player-id)
     (lay-bomb* player)))
+
+(defn remove-if-dead
+  [state {:keys [player-id] :as player} explosions]
+  (cond-> state
+    (sprites/sprite-intersects? player explosions)
+    (db/player-dead player-id)
+    )
+  )

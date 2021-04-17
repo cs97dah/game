@@ -73,13 +73,15 @@
   [state]
   (let [{:keys [tile-size]} (db/gui-info state)]
     (->> (tile-positions state :w)
-         (mapv #(wall/create % tile-size)))))
+         (map #(wall/create % tile-size))
+         (set))))
 
 (defn bricks [state]
   (let [{:keys [tile-size]} (db/gui-info state)]
     (->> (tile-positions state nil)
          (filter (fn [_] (pos? (rand-int 4))))
-         (mapv #(brick/create % tile-size)))))
+         (map #(brick/create % tile-size))
+         (set))))
 
 (defn players
   [state]
@@ -111,13 +113,24 @@
   [state exploded-bombs]
   (reduce #(bomb/explode-bomb %1 %2) state exploded-bombs))
 
+(defn kill-players
+  [state explosions]
+  (reduce #(player/remove-if-dead %1 %2 explosions) state (vals (db/players state))))
+
+(defn destroy-bricks
+  [state explosions]
+  (reduce #(brick/remove-if-hit %1 %2 explosions) state (db/bricks state)))
+
 (defn update-state
   [state]
   (let [current-time (db/game-time state)
         exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))
-        extinguished-explosions (filter #(< (:extinguishes-at %) current-time) (db/explosions state))]
+        explosions (db/explosions state)
+        extinguished-explosions (filter #(< (:extinguishes-at %) current-time)explosions )]
     (-> state
+        (kill-players explosions)
         (move-players)
+        (destroy-bricks explosions)
         (lay-bombs)
         (explode-bombs exploded-bombs)
         (db/dissoc-explosions extinguished-explosions))))

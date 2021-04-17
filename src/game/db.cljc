@@ -1,5 +1,6 @@
 (ns game.db
-  (:require [taoensso.timbre :as log]))
+  (:require [taoensso.timbre :as log]
+            [medley.core :as medley]))
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
@@ -30,6 +31,12 @@
   (let [state (assoc-in state path-walls walls)]
     ;; TODO: Can the above be scrapped to just have this instead?
     (reduce assoc-wall-by-coordinates state walls)))
+
+(defn dissoc-brick
+  [state {:keys [coordinates] :as brick}]
+  (-> state
+      (update-in path-bricks-by-coordinates dissoc coordinates)
+      (update-in  path-bricks disj brick)))
 
 (defn wall-at?
   [state coordinates]
@@ -93,6 +100,10 @@
   [state player-id]
   (get-in state (path-player-id player-id)))
 
+(defn player-dead
+  [state player-id]
+  (update-in state (path-player-id player-id) assoc :dead? true))
+
 (defn bombs
   [state]
   (get-in state path-bombs))
@@ -109,7 +120,6 @@
 
 (defn game-time-plus-millis
   [state millis]
-  (log/info "game-time-plus-millis"(+ (game-time state) millis))
   (+ (game-time state) millis))
 
 (defn dissoc-bomb

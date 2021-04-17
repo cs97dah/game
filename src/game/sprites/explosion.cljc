@@ -52,7 +52,6 @@
         fire-down (check-strength state coordinates bomb-strength :down)
         fire-left (check-strength state coordinates bomb-strength :left)
         fire-right (check-strength state coordinates bomb-strength :right)
-        _ (log/info "fire-up fire-down fire-lef fire-right" fire-up fire-down fire-left fire-right)
         extinguishes-at (db/game-time-plus-millis state explosion-active-millis)
         up-down-position (when (or fire-down fire-up)
                            {:x (+ (:x position) (quot (:x size) 4))
@@ -62,7 +61,8 @@
         up-down-size (when up-down-position
                        {:x (quot (:x size) 2)
                         :y (let [length (+ 1 (or fire-up 0) (or fire-down 0))]
-                             (+ length (* length (:y size))))})
+                             ; (+ length (* length (:y size)))
+                             (* length (:y size)))})
         up-down-explosion (when up-down-position
                             (map->Explosion {:position up-down-position
                                              :size up-down-size
@@ -76,7 +76,8 @@
         left-right-size (when left-right-position
                           {:y (quot (:y size) 2)
                            :x (let [length (+ 1 (or fire-left 0) (or fire-right 0))]
-                                (+ length (* length (:x size))))})
+                                ;(+ length (* length (:x size)))
+                                (* length (:x size)))})
         left-right-explosion (when left-right-position
                                (map->Explosion {:position left-right-position
                                                 :size left-right-size

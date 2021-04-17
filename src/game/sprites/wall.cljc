@@ -2,7 +2,8 @@
   (:require [game.sprites.core :as sprites]
             [game.gui :as gui]
             [quil.core :as q]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [game.db :as db]))
 
 (defrecord Wall
   [position size coordinates]
