@@ -8,6 +8,7 @@
 (def path-walls (conj path-sprites :walls))
 (def path-players [:players])
 (def path-bombs [:bombs])
+(def path-explosions [:explosions])
 (defn path-player-id [player-id] (conj path-players player-id))
 (def path-keys-pressed [:keys-pressed])
 
@@ -92,6 +93,18 @@
   (log/info "game-time-plus-millis"(+ (game-time state) millis))
   (+ (game-time state) millis))
 
-(defn remove-bomb
+(defn dissoc-bomb
   [state bomb]
   (update-in state path-bombs disj bomb))
+
+(defn assoc-explosions
+  [state explosions]
+  (update-in state path-explosions #(apply set-conj % explosions)))
+
+(defn explosions
+  [state]
+  (get-in state path-explosions))
+
+(defn dissoc-explosions
+  [state explosions]
+  (update-in state path-explosions #(apply disj % explosions)))

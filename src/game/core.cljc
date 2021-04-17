@@ -29,10 +29,12 @@
   (q/set-image 0 0 (db/background-image state))
   (let [bricks (db/bricks state)
         players (vals (db/players state))
-        bombs (db/bombs state)]
+        bombs (db/bombs state)
+        explosions (db/explosions state)]
     (render bricks)
     (render bombs)
-    (render players)))
+    (render players)
+    (render explosions)))
 
 (defn key-pressed
   [state key-details]

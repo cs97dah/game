@@ -11,7 +11,8 @@
               :red [154 41 15]
               :black [0 0 0]
               :grey [209 226 240]
-              :brown [122 68 25]})
+              :brown [122 68 25]
+              :orange [195 111 9]})
 
 (defn colour
   [colour]

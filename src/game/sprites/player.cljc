@@ -108,7 +108,7 @@
         proposed-bomb-position-and-size (proposed-bomb-position-and-size state player)]
     (-> (cond-> state
           (can-lay-bomb? state proposed-bomb-position-and-size)
-          (db/assoc-bomb (bomb/create state proposed-bomb-position-and-size)))
+          (db/assoc-bomb (bomb/create state player proposed-bomb-position-and-size)))
         (db/dissoc-key-pressed (bomb-key-for-player player-id)))))
 
 (defn lay-bomb

@@ -4,6 +4,7 @@
             [quil.core :as q]
             [game.sprites.wall :as wall]
             [game.sprites.brick :as brick]
+            [game.sprites.bomb :as bomb]
             [taoensso.timbre :as log]
             [game.sprites.player :as player]
             [game.gui :as gui]
@@ -46,10 +47,10 @@
 
 (defn background-image
   [state walls]
-  (let [{:keys [ tile-size]} (db/gui-info state)
+  (let [{:keys [tile-size]} (db/gui-info state)
         image-width (* tile-size (inc tiles-wide))
-        image-height(* tile-size (inc tiles-high))
-        background-image (q/create-image image-width image-height )]
+        image-height (* tile-size (inc tiles-high))
+        background-image (q/create-image image-width image-height)]
     (doseq [x (range image-width)
             y (range image-height)]
       (q/set-pixel background-image x y (apply q/color (get gui/colours :green))))
@@ -105,19 +106,22 @@
 
 (defn lay-bombs
   [state]
-  (reduce #(player/lay-bomb %1 %2) state (vals (db/players state)))
-  )
+  (reduce #(player/lay-bomb %1 %2) state (vals (db/players state))))
 
-(defn remove-exploded-bombs
+(defn explode-bombs
   [state exploded-bombs]
-  (reduce #(db/remove-bomb %1 %2) state exploded-bombs))
+  (reduce #(bomb/explode-bomb %1 %2) state exploded-bombs))
 
 (defn update-state
   [state]
   (let [current-time (db/game-time state)
-        exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))]
+        exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))
+        extinguished-explosions (filter #(< (:extinguishes-at %) current-time) (db/explosions state))]
+    ;(log/info "(db/explosions state)" (db/explosions state))
+    ;(log/info "extinguished-explosions" (into [] extinguished-explosions))
+    ;(log/info "current-time" current-time)
     (-> state
         (move-players)
         (lay-bombs)
-        (remove-exploded-bombs exploded-bombs)
-        )))
+        (explode-bombs exploded-bombs)
+        (db/dissoc-explosions extinguished-explosions))))
