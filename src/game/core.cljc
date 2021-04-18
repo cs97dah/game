@@ -7,9 +7,15 @@
             [quil.middleware :as m]
             [taoensso.timbre :as log]))
 
+;; Tile size must be a multiple of 4
+(def tile-size {:x 64 :y 64})
+(def board-size (-> tile-size
+                    (update :x * map/tiles-wide)
+                    (update :y * map/tiles-high)))
+
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state {:x 960 :y 832} {:x 64 :y 64})
+  (let [state (db/init-state board-size tile-size)
         {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)
@@ -51,7 +57,7 @@
 (defn ^:export run-sketch []
   (q/defsketch game
                :host "game"
-               :size [960 832]
+               :size [(:x board-size) (:y board-size)]
                ; setup function called only once, during sketch initialization.
                :setup setup
                ; update-state is called on each iteration before draw-state.

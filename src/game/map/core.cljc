@@ -7,8 +7,7 @@
             [game.sprites.brick :as brick]
             [game.sprites.player :as player]
             [game.sprites.wall :as wall]
-            [quil.core :as q]
-            [taoensso.timbre :as log]))
+            [quil.core :as q]))
 
 (def basic-map
   "Key:
