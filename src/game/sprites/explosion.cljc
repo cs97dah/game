@@ -57,7 +57,7 @@
                            {:x (+ (:x position) (quot (:x size) 4))
                             :y (cond-> (:y position)
                                  fire-up
-                                 (- (+ (* fire-up (:y size)) fire-up)))})
+                                 (- (* fire-up (:y size))))})
         up-down-size (when up-down-position
                        {:x (quot (:x size) 2)
                         :y (let [length (+ 1 (or fire-up 0) (or fire-down 0))]
@@ -71,7 +71,7 @@
                               {:y (+ (:y position) (quot (:y size) 4))
                                :x (cond-> (:x position)
                                     fire-left
-                                    (- (+ (* fire-left (:x size)) fire-left)))})
+                                    (- (* fire-left (:x size))))})
         left-right-size (when left-right-position
                           {:y (quot (:y size) 2)
                            :x (let [length (+ 1 (or fire-left 0) (or fire-right 0))]
