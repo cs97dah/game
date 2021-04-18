@@ -150,6 +150,7 @@
         (kill-players explosions)
         (move-players)
         (power-up-players)
+        ;; TODO: Bombs should make other bombs explode
         (explode-bombs exploded-bombs)
         (destroy-bricks explosions)
         (lay-bombs)

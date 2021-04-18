@@ -91,8 +91,8 @@
   (get-in state path-background-image))
 
 (defn init-state
-  [map-width-height tile-width-height ]
-  (assoc-in {} path-gui-info {:map-size {:x map-width-height :y map-width-height}
+  [map-size tile-width-height ]
+  (assoc-in {} path-gui-info {:map-size map-size
                               ;; TODO: tile size should be xy pair like everything else
                               :tile-size tile-width-height}))
 
