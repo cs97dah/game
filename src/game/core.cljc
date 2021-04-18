@@ -13,7 +13,7 @@
 
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state {:x 990 :y 858} 64)
+  (let [state (db/init-state {:x 990 :y 858} {:x 64 :y 64})
         {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)

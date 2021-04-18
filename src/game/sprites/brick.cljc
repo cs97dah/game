@@ -16,11 +16,8 @@
 (defn create
   [position tile-size]
   (map->Brick {:position position
-               :size {:x tile-size
-                      :y tile-size}
-               :coordinates (-> position
-                                (update :x quot tile-size)
-                                (update :y quot tile-size))}))
+               :size tile-size
+               :coordinates (sprites/coordinates position tile-size)}))
 (defn remove-if-hit
   [state brick explosions]
   (cond-> state

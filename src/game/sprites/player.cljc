@@ -44,14 +44,15 @@
 
 (defn create
   [player-id position tile-size]
-  (let [width (quot tile-size 2)
-        height (* 3 (quot tile-size 4))
+  (let [size (-> tile-size
+                 (update :x quot 2)
+                 (update :y #(* 3 (quot % 4))))
         position (-> position
-                     (update :x + (quot width 2))
-                     (update :y + (- tile-size height)))]
+                     (update :x + (quot (:x size) 2))
+                     (update :y + (- (:y tile-size) (:y size))))]
+
     (map->Player {:position position
-                  :size {:x width
-                         :y height}
+                  :size size
                   :player-id player-id
                   :bomb-strength 1})))
 
@@ -88,12 +89,11 @@
   (let [{:keys [x y] :as centre-of-player} {:x (+ (:x position) (quot (:x size) 2))
                                             :y (+ (:y position) (quot (:y size) 2))}
         {:keys [tile-size]} (db/gui-info state)
-        {:keys [x y] :as tile-index} {:x (quot x tile-size)
-                                      :y (quot y tile-size)}]
-    {:position {:x (+ (* tile-size x) x)
-                :y (+ (* tile-size y) y)}
-     :size {:x tile-size
-            :y tile-size}}))
+        {:keys [x y] :as tile-index} {:x (quot x (:x tile-size))
+                                      :y (quot y (:y tile-size))}]
+    {:position {:x (+ (* (:x tile-size) x) x)
+                :y (+ (* (:y tile-size) y) y)}
+     :size tile-size}))
 
 (defn laying-bomb?
   [state player-id]

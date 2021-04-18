@@ -48,11 +48,12 @@
 (defn background-image
   [state walls]
   (let [{:keys [tile-size]} (db/gui-info state)
-        image-width (* tile-size (inc tiles-wide))
-        image-height (* tile-size (inc tiles-high))
-        background-image (q/create-image image-width image-height)]
-    (doseq [x (range image-width)
-            y (range image-height)]
+        image-size (-> tile-size
+                       (update :x * (inc tiles-wide))
+                       (update :y * (inc tiles-high)))
+        background-image (q/create-image (:x image-size) (:y image-size))]
+    (doseq [x (range (:x image-size))
+            y (range (:y image-size))]
       (q/set-pixel background-image x y (apply q/color (get gui/colours :green))))
     (doseq [wall walls]
       (paint-wall background-image wall))
@@ -62,13 +63,14 @@
 (defn tile-positions
   [state expected-shorthand]
   (let [{:keys [tile-size]} (db/gui-info state)]
+    (log/info "tile-positions" tile-size)
     (doall
       (for [y (range tiles-high)
             x (range tiles-wide)
             :let [shorthand (nth (nth basic-map y) x)]
             :when (= expected-shorthand shorthand)]
-        {:x (+ x (* x tile-size))
-         :y (+ y (* y tile-size))}))))
+        {:x (+ x (* x (:x tile-size)))
+         :y (+ y (* y (:y tile-size)))}))))
 
 (defn walls
   [state]

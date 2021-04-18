@@ -48,3 +48,9 @@
                               (apply disj (db/bombs state) bombs-player-is-already-on))
         proposed-player (update-position player proposed-move)]
     (not (sprite-intersects proposed-player solid-objects))))
+
+(defn coordinates
+  [position tile-size]
+  (-> position
+      (update :x quot (:x tile-size))
+      (update :y quot (:y tile-size))))

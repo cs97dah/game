@@ -38,7 +38,7 @@
   [state {:keys [coordinates] :as brick}]
   (-> state
       (update-in path-bricks-by-coordinates dissoc coordinates)
-      (update-in  path-bricks disj brick)))
+      (update-in path-bricks disj brick)))
 
 (defn wall-at?
   [state coordinates]
@@ -59,7 +59,7 @@
   (assoc-in state path-bomb-power-ups bomb-power-ups))
 
 (defn bomb-power-ups
-  [state ]
+  [state]
   (get-in state path-bomb-power-ups))
 
 (defn dissoc-bomb-power-up
@@ -91,10 +91,9 @@
   (get-in state path-background-image))
 
 (defn init-state
-  [map-size tile-width-height ]
+  [map-size tile-size]
   (assoc-in {} path-gui-info {:map-size map-size
-                              ;; TODO: tile size should be xy pair like everything else
-                              :tile-size tile-width-height}))
+                              :tile-size tile-size}))
 
 (def set-conj (fnil conj #{}))
 
