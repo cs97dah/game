@@ -11,8 +11,10 @@
 (def path-players [:players])
 (def path-bombs [:bombs])
 (def path-explosions [:explosions])
+(def path-bomb-power-ups [:bomb-power-ups])
 (defn path-player-id [player-id] (conj path-players player-id))
 (def path-keys-pressed [:keys-pressed])
+(def path-time [:time])
 
 (defn gui-info
   [state]
@@ -51,6 +53,18 @@
   (let [state (assoc-in state path-bricks bricks)]
     ;; TODO: Can the above be scrapped to just have this instead?
     (reduce assoc-brick-by-coordinates state bricks)))
+
+(defn assoc-bomb-power-ups
+  [state bomb-power-ups]
+  (assoc-in state path-bomb-power-ups bomb-power-ups))
+
+(defn bomb-power-ups
+  [state ]
+  (get-in state path-bomb-power-ups))
+
+(defn dissoc-bomb-power-up
+  [state power-up]
+  (update-in state path-bomb-power-ups disj power-up))
 
 (defn brick-at?
   [state coordinates]
@@ -104,6 +118,10 @@
   [state player-id]
   (update-in state (path-player-id player-id) assoc :dead? true))
 
+(defn bomb-power-up
+  [state player-id]
+  (update-in state (conj (path-player-id player-id) :bomb-strength) inc))
+
 (defn bombs
   [state]
   (get-in state path-bombs))
@@ -112,11 +130,18 @@
   [state bomb]
   (update-in state path-bombs set-conj bomb))
 
-(defn game-time
-  [state]
+(defn- millis []
   ;; TODO: Keep a game time in state
   #?(:clj  (System/currentTimeMillis)
      :cljs (.getTime (js/Date.))))
+
+(defn tick-game-time
+  [state]
+  (assoc-in state path-time (millis)))
+
+(defn game-time
+  [state]
+  (get-in state path-time))
 
 (defn game-time-plus-millis
   [state millis]

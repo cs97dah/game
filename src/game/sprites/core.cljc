@@ -1,6 +1,7 @@
 (ns game.sprites.core
   (:require [game.db :as db]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [medley.core :as medley]))
 
 (defprotocol Sprite
   (render [sprite]))
@@ -33,12 +34,11 @@
                                     (is-left? sprite-b sprite-a)))]
     sprites-intersect?))
 
-(defn sprite-intersects?
+(defn sprite-intersects
+  "Returns the first sprite from the sequence of sprites that intersects sprite
+  (or nil if none intersect)"
   [sprite sprites]
-  (reduce (fn [_ solid-object]
-            (if (sprites-intersect? sprite solid-object)
-              (reduced true)
-              false)) nil sprites))
+  (medley/find-first #(sprites-intersect? sprite %) sprites))
 
 (defn can-move?
   [state player proposed-move]
@@ -47,4 +47,4 @@
                               (db/walls state)
                               (apply disj (db/bombs state) bombs-player-is-already-on))
         proposed-player (update-position player proposed-move)]
-    (not (sprite-intersects? proposed-player solid-objects))))
+    (not (sprite-intersects proposed-player solid-objects))))

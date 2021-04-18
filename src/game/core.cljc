@@ -14,11 +14,12 @@
 (defn setup []
   (q/frame-rate 30)
   (let [state (db/init-state 500 32)
-        {:keys [background-image walls bricks players]} (map/generate state)]
+        {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)
         (db/assoc-walls walls)
         (db/assoc-bricks bricks)
+        (db/assoc-bomb-power-ups bomb-power-ups)
         (db/assoc-players players))))
 
 (defn render
@@ -31,7 +32,9 @@
   (let [bricks (db/bricks state)
         players (vals (db/players state))
         bombs (db/bombs state)
+        bomb-power-ups (db/bomb-power-ups state)
         explosions (db/explosions state)]
+    (render bomb-power-ups)
     (render bricks)
     (render bombs)
     (render players)

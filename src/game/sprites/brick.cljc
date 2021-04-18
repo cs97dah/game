@@ -24,7 +24,7 @@
 (defn remove-if-hit
   [state brick explosions]
   (cond-> state
-    (sprites/sprite-intersects? brick explosions)
+    (sprites/sprite-intersects brick explosions)
     (db/dissoc-brick brick)
     )
   )

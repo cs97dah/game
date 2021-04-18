@@ -102,7 +102,7 @@
 (defn can-lay-bomb?
   [state proposed-bomb-position-and-size]
   (let [bombs (db/bombs state)]
-    (not (sprites/sprite-intersects? proposed-bomb-position-and-size bombs))))
+    (not (sprites/sprite-intersects proposed-bomb-position-and-size bombs))))
 
 (defn lay-bomb*
   [state {:keys [player-id] :as player}]
@@ -122,7 +122,15 @@
 (defn remove-if-dead
   [state {:keys [player-id] :as player} explosions]
   (cond-> state
-    (sprites/sprite-intersects? player explosions)
-    (db/player-dead player-id)
-    )
-  )
+    (sprites/sprite-intersects player explosions)
+    (db/player-dead player-id)))
+
+(defn power-up
+  [state {:keys [player-id] :as player}]
+  (let [bomb-power-ups (db/bomb-power-ups state)
+        power-up (sprites/sprite-intersects player bomb-power-ups)]
+    (cond-> state
+      power-up
+      (->
+        (db/bomb-power-up player-id)
+        (db/dissoc-bomb-power-up power-up)))))

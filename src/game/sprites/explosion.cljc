@@ -5,7 +5,7 @@
             [game.db :as db]
             [taoensso.timbre :as log]))
 
-(def explosion-active-millis 2000)
+(def explosion-active-millis 500)
 
 (defrecord Explosion
   [position size extinguishes-at]
@@ -61,7 +61,6 @@
         up-down-size (when up-down-position
                        {:x (quot (:x size) 2)
                         :y (let [length (+ 1 (or fire-up 0) (or fire-down 0))]
-                             ; (+ length (* length (:y size)))
                              (* length (:y size)))})
         up-down-explosion (when up-down-position
                             (map->Explosion {:position up-down-position
@@ -76,7 +75,6 @@
         left-right-size (when left-right-position
                           {:y (quot (:y size) 2)
                            :x (let [length (+ 1 (or fire-left 0) (or fire-right 0))]
-                                ;(+ length (* length (:x size)))
                                 (* length (:x size)))})
         left-right-explosion (when left-right-position
                                (map->Explosion {:position left-right-position

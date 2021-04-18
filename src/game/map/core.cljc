@@ -5,6 +5,7 @@
             [game.sprites.wall :as wall]
             [game.sprites.brick :as brick]
             [game.sprites.bomb :as bomb]
+            [game.sprites.bomb-power-up :as bomb-power-up]
             [taoensso.timbre :as log]
             [game.sprites.player :as player]
             [game.gui :as gui]
@@ -76,10 +77,14 @@
          (map #(wall/create % tile-size))
          (set))))
 
+(defn one-in
+  [n]
+  (fn [_] (zero? (rand-int 4))))
+
 (defn bricks [state]
   (let [{:keys [tile-size]} (db/gui-info state)]
     (->> (tile-positions state nil)
-         (filter (fn [_] (pos? (rand-int 4))))
+         (remove (one-in 4))
          (map #(brick/create % tile-size))
          (set))))
 
@@ -91,14 +96,23 @@
                         {player-id (player/create player-id position tile-size)}))
          (apply merge))))
 
-(defn generate
+(defn bomb-power-ups
+  [bricks]
+  (->> bricks
+       (filter (one-in 4))
+       (map bomb-power-up/create)
+       (set)))
+
+(defn initial-state
   [state]
   (let [walls (walls state)
         bricks (bricks state)
-        players (players state)]
+        players (players state)
+        bomb-power-ups (bomb-power-ups bricks)]
     {:background-image (background-image state walls)
      :walls walls
      :bricks bricks
+     :bomb-power-ups bomb-power-ups
      :players players}))
 
 (defn move-players
@@ -121,16 +135,22 @@
   [state explosions]
   (reduce #(brick/remove-if-hit %1 %2 explosions) state (db/bricks state)))
 
+(defn power-up-players
+  [state]
+  (reduce #(player/power-up %1 %2) state (vals (db/players state))))
+
 (defn update-state
   [state]
-  (let [current-time (db/game-time state)
+  (let [state (db/tick-game-time state)
+        current-time (db/game-time state)
         exploded-bombs (filter #(< (:bomb-explodes-at %) current-time) (db/bombs state))
         explosions (db/explosions state)
-        extinguished-explosions (filter #(< (:extinguishes-at %) current-time)explosions )]
+        extinguished-explosions (filter #(< (:extinguishes-at %) current-time) explosions)]
     (-> state
         (kill-players explosions)
         (move-players)
+        (power-up-players)
+        (explode-bombs exploded-bombs)
         (destroy-bricks explosions)
         (lay-bombs)
-        (explode-bombs exploded-bombs)
         (db/dissoc-explosions extinguished-explosions))))
