@@ -5,7 +5,8 @@
             [game.sprites.bomb :as bomb]
             [game.sprites.core :as sprites]
             [medley.core :as medley]
-            [quil.core :as q]))
+            [quil.core :as q]
+            [taoensso.timbre :as log]))
 
 (def player-colours
   {0 (gui/colour :red)})
@@ -31,7 +32,7 @@
                                                             (reduced key))) nil %))))
 
 (defrecord Player
-  [position size player-id bomb-strength dead?]
+  [position size player-id bomb-strength dead? speed-multiplier]
   sprites/Sprite
 
   (render [_]
@@ -39,6 +40,7 @@
     (when-not dead?
       (let [{:keys [x y]} position]
         (apply q/fill (get player-colours player-id))
+        (q/no-stroke)
         (q/rect x y (:x size) (:y size))))))
 
 (defn create
@@ -53,7 +55,8 @@
     (map->Player {:position position
                   :size size
                   :player-id player-id
-                  :bomb-strength 1})))
+                  :bomb-strength 1
+                  :speed-multiplier 1})))
 
 (defn player-commands
   [state player-id]
@@ -83,15 +86,16 @@
   (let [commands (player-commands state player-id)]
     (reduce #(move-player* %1 player-id %2) state (disj commands :bomb))))
 
-(defn proposed-bomb-position-and-size
+(defn proposed-bomb-position-coordinates-and-size
   [state {:keys [position size] :as player}]
-  (let [{:keys [x y] :as centre-of-player} {:x (+ (:x position) (quot (:x size) 2))
-                                            :y (+ (:y position) (quot (:y size) 2))}
+  (let [centre-of-player (-> position
+                             (update :x + (quot (:x size) 2))
+                             (update :y + (quot (:y size) 2)))
         {:keys [tile-size]} (db/gui-info state)
-        {:keys [x y] :as tile-index} {:x (quot x (:x tile-size))
-                                      :y (quot y (:y tile-size))}]
-    {:position {:x (+ (* (:x tile-size) x) x)
-                :y (+ (* (:y tile-size) y) y)}
+        coordinates (sprites/coordinates centre-of-player tile-size)
+        position (sprites/position-of-coordinates state coordinates)]
+    {:position position
+     :coordinates coordinates
      :size tile-size}))
 
 (defn laying-bomb?
@@ -106,10 +110,10 @@
 (defn lay-bomb*
   [state {:keys [player-id] :as player}]
   (let [player (db/player state player-id)
-        proposed-bomb-position-and-size (proposed-bomb-position-and-size state player)]
+        proposed-bomb-position-coordinates-and-size (proposed-bomb-position-coordinates-and-size state player)]
     (-> (cond-> state
-          (can-lay-bomb? state proposed-bomb-position-and-size)
-          (db/assoc-bomb (bomb/create state player proposed-bomb-position-and-size)))
+          (can-lay-bomb? state proposed-bomb-position-coordinates-and-size)
+          (db/assoc-bomb (bomb/create state player proposed-bomb-position-coordinates-and-size)))
         (db/dissoc-key-pressed (bomb-key-for-player player-id)))))
 
 (defn lay-bomb

@@ -12,6 +12,7 @@
     (let [{:keys [x y]} position]
       (q/ellipse-mode :corner)
       (apply q/fill (gui/colour :purple))
+      (q/no-stroke)
       (q/ellipse x y (:x size) (:y size)))))
 
 (defn create

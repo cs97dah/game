@@ -9,7 +9,7 @@
 
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state {:x 990 :y 858} {:x 64 :y 64})
+  (let [state (db/init-state {:x 960 :y 832} {:x 64 :y 64})
         {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)
@@ -51,7 +51,7 @@
 (defn ^:export run-sketch []
   (q/defsketch game
                :host "game"
-               :size [990 858]
+               :size [960 832]
                ; setup function called only once, during sketch initialization.
                :setup setup
                ; update-state is called on each iteration before draw-state.

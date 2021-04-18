@@ -7,14 +7,17 @@
             [game.sprites.brick :as brick]
             [game.sprites.player :as player]
             [game.sprites.wall :as wall]
-            [quil.core :as q]))
+            [quil.core :as q]
+            [taoensso.timbre :as log]))
 
 (def basic-map
   "Key:
     w = wall
     p = spawn locations of players 1 -4
     f = free space"
-  (->> ["wwwwwwwwwwwwwww"
+  (->> #_["ww"
+        "ww"]
+       ["wwwwwwwwwwwwwww"
         "wpf         ffw"
         "wfw w w w w wfw"
         "w             w"
@@ -37,8 +40,8 @@
   [background-image {:keys [size position] :as wall}]
   (let [{start-x :x start-y :y} position
         {size-x :x size-y :y} size
-        end-x (+ start-x size-x)
-        end-y (+ start-y size-y)]
+        end-x (dec (+ start-x size-x))
+        end-y (dec (+ start-y size-y))]
     (doseq [x (range start-x (inc end-x))
             y (range start-y (inc end-y))]
       (q/set-pixel background-image x y (apply q/color (get gui/colours :grey))))))
@@ -47,8 +50,8 @@
   [state walls]
   (let [{:keys [tile-size]} (db/gui-info state)
         image-size (-> tile-size
-                       (update :x * (inc tiles-wide))
-                       (update :y * (inc tiles-high)))
+                       (update :x * tiles-wide)
+                       (update :y * tiles-high))
         background-image (q/create-image (:x image-size) (:y image-size))]
     (doseq [x (range (:x image-size))
             y (range (:y image-size))]
@@ -66,8 +69,8 @@
             x (range tiles-wide)
             :let [shorthand (nth (nth basic-map y) x)]
             :when (= expected-shorthand shorthand)]
-        {:x (+ x (* x (:x tile-size)))
-         :y (+ y (* y (:y tile-size)))}))))
+        {:x (* x (:x tile-size))
+         :y (* y (:y tile-size))}))))
 
 (defn walls
   [state]

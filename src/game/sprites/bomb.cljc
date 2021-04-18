@@ -15,16 +15,14 @@
     (let [{:keys [x y]} position]
       (q/ellipse-mode :corner)
       (apply q/fill (gui/colour :black))
+      (q/no-stroke)
       (q/ellipse x y (:x size) (:y size)))))
 
 (defn create
-  [state {:keys [bomb-strength] :as player} {:keys [position size] :as position-and-size}]
-  (map->Bomb (assoc position-and-size
+  [state {:keys [bomb-strength] :as player} position-coordinates-and-size]
+  (map->Bomb (assoc position-coordinates-and-size
                     :bomb-explodes-at (db/game-time-plus-millis state bomb-explode-millis)
-                    :bomb-strength bomb-strength
-                    :coordinates (-> position
-                                     (update :x quot (:x size))
-                                     (update :y quot (:y size))))))
+                    :bomb-strength bomb-strength)))
 
 (defn explode-bomb
   [state bomb]

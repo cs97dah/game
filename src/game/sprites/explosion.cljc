@@ -13,6 +13,7 @@
   (render [_]
     (let [{:keys [x y]} position]
       (apply q/fill (gui/colour :orange))
+      (q/no-stroke)
       (q/rect x y (:x size) (:y size)))))
 
 (defn conj-some
