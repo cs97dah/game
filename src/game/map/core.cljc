@@ -1,15 +1,13 @@
 (ns game.map.core
   (:require [clojure.string :as string]
             [game.db :as db]
-            [quil.core :as q]
-            [game.sprites.wall :as wall]
-            [game.sprites.brick :as brick]
+            [game.gui :as gui]
             [game.sprites.bomb :as bomb]
             [game.sprites.bomb-power-up :as bomb-power-up]
-            [taoensso.timbre :as log]
+            [game.sprites.brick :as brick]
             [game.sprites.player :as player]
-            [game.gui :as gui]
-            [medley.core :as medley]))
+            [game.sprites.wall :as wall]
+            [quil.core :as q]))
 
 (def basic-map
   "Key:
@@ -63,7 +61,6 @@
 (defn tile-positions
   [state expected-shorthand]
   (let [{:keys [tile-size]} (db/gui-info state)]
-    (log/info "tile-positions" tile-size)
     (doall
       (for [y (range tiles-high)
             x (range tiles-wide)

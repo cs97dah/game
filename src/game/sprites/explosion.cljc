@@ -1,9 +1,8 @@
 (ns game.sprites.explosion
-  (:require [game.sprites.core :as sprites]
+  (:require [game.db :as db]
             [game.gui :as gui]
-            [quil.core :as q]
-            [game.db :as db]
-            [taoensso.timbre :as log]))
+            [game.sprites.core :as sprites]
+            [quil.core :as q]))
 
 (def explosion-active-millis 500)
 

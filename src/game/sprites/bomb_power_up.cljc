@@ -1,10 +1,8 @@
 (ns game.sprites.bomb-power-up
-  (:require [game.sprites.core :as sprites]
-            [game.gui :as gui]
-            [quil.core :as q]
-            [taoensso.timbre :as log]
-            [game.db :as db]
-            [medley.core :as medley]))
+  (:require [game.gui :as gui]
+            [game.sprites.core :as sprites]
+            [medley.core :as medley]
+            [quil.core :as q]))
 
 (defrecord BombPowerUp
   [position size coordinates]

@@ -1,12 +1,11 @@
 (ns game.sprites.player
-  (:require [game.sprites.core :as sprites]
-            [game.gui :as gui]
-            [quil.core :as q]
+  (:require [clojure.set :as set]
             [game.db :as db]
-            [clojure.set :as set]
+            [game.gui :as gui]
             [game.sprites.bomb :as bomb]
+            [game.sprites.core :as sprites]
             [medley.core :as medley]
-            [taoensso.timbre :as log]))
+            [quil.core :as q]))
 
 (def player-colours
   {0 (gui/colour :red)})

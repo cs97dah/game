@@ -1,6 +1,5 @@
 (ns game.sprites.core
   (:require [game.db :as db]
-            [taoensso.timbre :as log]
             [medley.core :as medley]))
 
 (defprotocol Sprite

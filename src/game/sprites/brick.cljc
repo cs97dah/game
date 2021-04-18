@@ -1,8 +1,8 @@
 (ns game.sprites.brick
-  (:require [game.sprites.core :as sprites]
+  (:require [game.db :as db]
             [game.gui :as gui]
-            [quil.core :as q]
-            [game.db :as db]))
+            [game.sprites.core :as sprites]
+            [quil.core :as q]))
 
 (defrecord Brick
   [position size coordinates]
@@ -22,6 +22,4 @@
   [state brick explosions]
   (cond-> state
     (sprites/sprite-intersects brick explosions)
-    (db/dissoc-brick brick)
-    )
-  )
+    (db/dissoc-brick brick)))

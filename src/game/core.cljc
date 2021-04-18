@@ -1,15 +1,11 @@
 (ns game.core
-  (:require [quil.core :as q :include-macros true]
-            [game.gui :as gui]
-            [quil.middleware :as m]
-            [medley.core :as medley]
-            [taoensso.timbre :as log]
-            [clojure.string :as string]
+  (:require [game.db :as db]
             [game.map.core :as map]
-            [game.db :as db]
+            [game.sprites.core :as sprites]
             [game.sprites.player :as player]
-            [game.sprites.core :as sprites-core]            ;; TODO: rename to sprites when possible
-            ))
+            [quil.core :as q :include-macros true]
+            [quil.middleware :as m]
+            [taoensso.timbre :as log]))
 
 (defn setup []
   (q/frame-rate 30)
@@ -25,7 +21,7 @@
 (defn render
   [sprites]
   (doseq [sprite sprites]
-    (sprites-core/render sprite)))
+    (sprites/render sprite)))
 
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
@@ -53,7 +49,6 @@
 
 ; this function is called in index.html
 (defn ^:export run-sketch []
-  ;(log/info "Height:" (q/height))
   (q/defsketch game
                :host "game"
                :size [990 858]

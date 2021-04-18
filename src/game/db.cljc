@@ -1,6 +1,4 @@
-(ns game.db
-  (:require [taoensso.timbre :as log]
-            [medley.core :as medley]))
+(ns game.db)
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))

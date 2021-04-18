@@ -1,5 +1,4 @@
-(ns game.gui
-  (:require [quil.core :as q]))
+(ns game.gui)
 
 (def colours {:light-green [0 163 117]
               :peach [226 133 110]

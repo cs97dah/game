@@ -8,10 +8,7 @@
                  [org.clojure/clojurescript "1.10.520"]
 
                  [medley "1.3.0"]
-                 [com.taoensso/timbre "4.10.0"]
-                 ;[org.clojure/core.async "1.3.610"]
-
-                 ]
+                 [com.taoensso/timbre "4.10.0"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-figwheel "0.5.19"]]
