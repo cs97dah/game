@@ -11,6 +11,7 @@
 (def path-bombs [:bombs])
 (def path-explosions [:explosions])
 (def path-bomb-power-ups [:bomb-power-ups])
+(def path-speed-power-ups [:speed-power-ups])
 (def path-bombs-by-coordinates [:bombs-by-coords])
 (defn path-player-id [player-id] (conj path-players player-id))
 (def path-keys-pressed [:keys-pressed])
@@ -68,6 +69,18 @@
   [state power-up]
   (update-in state path-bomb-power-ups disj power-up))
 
+(defn assoc-speed-power-ups
+  [state speed-power-ups]
+  (assoc-in state path-speed-power-ups speed-power-ups))
+
+(defn speed-power-ups
+  [state]
+  (get-in state path-speed-power-ups))
+
+(defn dissoc-speed-power-up
+  [state power-up]
+  (update-in state path-speed-power-ups disj power-up))
+
 (defn brick-at?
   [state coordinates]
   (get-in state (conj path-bricks-by-coordinates coordinates)))
@@ -118,6 +131,10 @@
   [state player-id]
   (update-in state (conj (path-player-id player-id) :bomb-strength) inc))
 
+(defn speed-power-up
+  [state player-id]
+  (update-in state (conj (path-player-id player-id) :speed-multiplier) #(* 1.2 %)))
+
 (defn bombs
   [state]
   (get-in state path-bombs))
@@ -164,8 +181,10 @@
       (tick-game-time)))
 
 (defn dissoc-bomb
-  [state bomb]
-  (update-in state path-bombs disj bomb))
+  [state {:keys [coordinates] :as bomb}]
+  (-> state
+      (update-in path-bombs disj bomb)
+      (update-in path-bombs-by-coordinates dissoc coordinates)))
 
 (defn assoc-explosions
   [state explosions]

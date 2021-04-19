@@ -10,12 +10,13 @@
 (defn setup []
   (q/frame-rate 30)
   (let [state (db/init-state map/board-size map/tile-size map/move-pixels-per-second)
-        {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
+        {:keys [background-image walls bricks bomb-power-ups players speed-power-ups]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)
         (db/assoc-walls walls)
         (db/assoc-bricks bricks)
         (db/assoc-bomb-power-ups bomb-power-ups)
+        (db/assoc-speed-power-ups speed-power-ups)
         (db/assoc-players players))))
 
 (defn render
@@ -29,8 +30,10 @@
         players (vals (db/players state))
         bombs (db/bombs state)
         bomb-power-ups (db/bomb-power-ups state)
+        speed-power-ups (db/speed-power-ups state)
         explosions (db/explosions state)]
     (render bomb-power-ups)
+    (render speed-power-ups)
     (render bricks)
     (render bombs)
     (render players)

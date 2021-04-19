@@ -69,17 +69,6 @@
    :left {:x -1 :y 0}
    :right {:x 1 :y 0}})
 
-;(defn move-player*
-;  [state player-id move-vector]
-;  (let [{:keys [speed-multiplier coordinates] :as player} (db/player state player-id)
-;        distance (* speed-multiplier (Math/sqrt (reduce + move-vector)))]
-;    ;; TODO: Use update-position in sprite.core
-;    (cond-> state
-;      (sprites/can-move? state player proposed-move)        ;; TODO: Partial movements required
-;      (->
-;        (update-in (conj (db/path-player-id player-id) :position :x) + x)
-;        (update-in (conj (db/path-player-id player-id) :position :y) + y)))))
-
 (defn sqrt
   [x]
   #?(:clj  (Math/sqrt x)
@@ -161,8 +150,11 @@
                            (let [distance-in-each-direction (sqrt (/ (* straight-line-distance straight-line-distance) 2))]
                              (medley/map-vals #(* distance-in-each-direction %) direction-map)))]
       (if potential-object-distances
-        (let [                                              ;_ (log/info "potential-object-distances" potential-object-distances)
-              x (if-let [potential-x-distance (:x potential-object-distances)]
+        ;; TODO: Fix this - there might be some left over distance that could be
+        ;; used here - seen when running along a wall and trying to move into it
+        ;; at the same time - should move at the same speed as just running down
+        ;; it but doesn't (it's slower)
+        (let [x (if-let [potential-x-distance (:x potential-object-distances)]
                   (let [ideal-x-move (abs (:x ideal-move-map))]
                     (cond-> (min ideal-x-move potential-x-distance)
                       (neg? (:x ideal-move-map))
@@ -176,7 +168,6 @@
                   (:y ideal-move-map))
               actual-move-map {:x x :y y}
               state (update-in state (conj (db/path-player-id player-id) :position) #(merge-with + % actual-move-map))]
-          ;(log/info "New player state:" (get-in state (conj (db/path-player-id player-id))))
           state)
         (update-in state (conj (db/path-player-id player-id) :position) #(merge-with + % ideal-move-map))))
     state))
@@ -226,10 +217,17 @@
 
 (defn power-up
   [state {:keys [player-id] :as player}]
-  (let [bomb-power-ups (db/bomb-power-ups state)
-        power-up (sprites/sprite-intersects player bomb-power-ups)]
+  ;; TODO: This could all be more efficient by working off coordinates
+  (let [bomb-power-up (sprites/sprite-intersects player (db/bomb-power-ups state))
+        speed-power-up (when-not bomb-power-up
+                         (sprites/sprite-intersects player (db/speed-power-ups state)))]
     (cond-> state
-      power-up
+      bomb-power-up
       (->
         (db/bomb-power-up player-id)
-        (db/dissoc-bomb-power-up power-up)))))
+        (db/dissoc-bomb-power-up bomb-power-up))
+
+      speed-power-up
+      (->
+        (db/speed-power-up player-id)
+        (db/dissoc-speed-power-up speed-power-up)))))

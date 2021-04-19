@@ -4,10 +4,12 @@
             [game.gui :as gui]
             [game.sprites.bomb :as bomb]
             [game.sprites.bomb-power-up :as bomb-power-up]
+            [game.sprites.speed-power-up :as speed-power-up]
             [game.sprites.brick :as brick]
             [game.sprites.player :as player]
             [game.sprites.wall :as wall]
-            [quil.core :as q]))
+            [quil.core :as q]
+            [taoensso.timbre :as log]))
 
 (def basic-map
   "Key:
@@ -15,22 +17,22 @@
     p = spawn locations of players 1 -4
     f = free space"
   (->> #_["ww"
-        "ww"]
-       ["wwwwwwwwwwwwwww"
-        "wpf         ffw"
-        "wfw w w w w wfw"
-        "w             w"
-        "w w w w w w w w"
-        "w             w"
-        "w w w w w w w w"
-        "w             w"
-        "w w w w w w w w"
-        "w             w"
-        "wfw w w w w wfw"
-        "wff         ffw"
-        "wwwwwwwwwwwwwww"]
-       (map seq)
-       (map (partial map (comp keyword #(when-not (string/blank? %) %) str)))))
+          "ww"]
+    ["wwwwwwwwwwwwwww"
+     "wpf         ffw"
+     "wfw w w w w wfw"
+     "w             w"
+     "w w w w w w w w"
+     "w             w"
+     "w w w w w w w w"
+     "w             w"
+     "w w w w w w w w"
+     "w             w"
+     "wfw w w w w wfw"
+     "wff         ffw"
+     "wwwwwwwwwwwwwww"]
+    (map seq)
+    (map (partial map (comp keyword #(when-not (string/blank? %) %) str)))))
 
 (def tiles-wide (count (first basic-map)))
 (def tiles-high (count basic-map))
@@ -111,16 +113,27 @@
        (map bomb-power-up/create)
        (set)))
 
+(defn speed-power-ups
+  [bricks bomb-power-ups]
+  (let [bomb-power-up-coordinates (set (map :coordinates bomb-power-ups))]
+    (->> bricks
+         (remove #(bomb-power-up-coordinates (:coordinates %)))
+         (filter (one-in 4))
+         (map speed-power-up/create)
+         (set))))
+
 (defn initial-state
   [state]
   (let [walls (walls state)
         bricks (bricks state)
         players (players state)
-        bomb-power-ups (bomb-power-ups bricks)]
+        bomb-power-ups (bomb-power-ups bricks)
+        speed-power-ups (speed-power-ups bricks bomb-power-ups)]
     {:background-image (background-image state walls)
      :walls walls
      :bricks bricks
      :bomb-power-ups bomb-power-ups
+     :speed-power-ups speed-power-ups
      :players players}))
 
 (defn move-players
