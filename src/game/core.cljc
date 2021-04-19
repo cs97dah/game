@@ -7,15 +7,9 @@
             [quil.middleware :as m]
             [taoensso.timbre :as log]))
 
-;; Tile size must be a multiple of 4
-(def tile-size {:x 64 :y 64})
-(def board-size (-> tile-size
-                    (update :x * map/tiles-wide)
-                    (update :y * map/tiles-high)))
-
 (defn setup []
   (q/frame-rate 30)
-  (let [state (db/init-state board-size tile-size)
+  (let [state (db/init-state map/board-size map/tile-size map/move-pixels-per-second)
         {:keys [background-image walls bricks bomb-power-ups players]} (map/initial-state state)]
     (-> state
         (db/assoc-background-image background-image)
@@ -44,10 +38,11 @@
 
 (defn key-pressed
   [state key-details]
-  (let [key (-> key-details :key player/relevant-keys)]
-    (cond-> state
-      key
-      (db/assoc-key-pressed  key))))
+  (if-let [key (-> key-details :key player/relevant-keys)]
+    (db/assoc-key-pressed state key)
+    (do
+      ;(log/info "Current state:" (:players state))
+      state)))
 
 (defn key-released
   [state key-details]
@@ -57,7 +52,7 @@
 (defn ^:export run-sketch []
   (q/defsketch game
                :host "game"
-               :size [(:x board-size) (:y board-size)]
+               :size [(:x map/board-size) (:y map/board-size)]
                ; setup function called only once, during sketch initialization.
                :setup setup
                ; update-state is called on each iteration before draw-state.
@@ -67,11 +62,8 @@
                ; Check quil wiki for more info about middlewares and particularly
                ; fun-mode.
                :middleware [m/fun-mode]
-
                :key-pressed key-pressed
-               :key-released key-released
-
-               ))
+               :key-released key-released))
 
 ; uncomment this line to reset the sketch:
 ; (run-sketch)

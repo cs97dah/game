@@ -35,6 +35,13 @@
 (def tiles-wide (count (first basic-map)))
 (def tiles-high (count basic-map))
 
+;; Tile size must be a multiple of 4
+(def tile-size {:x 64 :y 64})
+(def board-size (-> tile-size
+                    (update :x * tiles-wide)
+                    (update :y * tiles-high)))
+(def move-pixels-per-second (:x tile-size))
+
 (defn paint-wall
   [background-image {:keys [size position] :as wall}]
   (let [{start-x :x start-y :y} position

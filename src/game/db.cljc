@@ -1,4 +1,5 @@
-(ns game.db)
+(ns game.db
+  (:require [taoensso.timbre :as log]))
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
@@ -10,9 +11,12 @@
 (def path-bombs [:bombs])
 (def path-explosions [:explosions])
 (def path-bomb-power-ups [:bomb-power-ups])
+(def path-bombs-by-coordinates [:bombs-by-coords])
 (defn path-player-id [player-id] (conj path-players player-id))
 (def path-keys-pressed [:keys-pressed])
 (def path-time [:time])
+(def path-time-now (conj path-time :now))
+(def path-time-previous (conj path-time :previous))
 
 (defn gui-info
   [state]
@@ -88,11 +92,6 @@
   [state]
   (get-in state path-background-image))
 
-(defn init-state
-  [map-size tile-size]
-  (assoc-in {} path-gui-info {:map-size map-size
-                              :tile-size tile-size}))
-
 (def set-conj (fnil conj #{}))
 
 (defn assoc-key-pressed
@@ -124,25 +123,45 @@
   (get-in state path-bombs))
 
 (defn assoc-bomb
-  [state bomb]
-  (update-in state path-bombs set-conj bomb))
+  [state {:keys [coordinates] :as bomb}]
+  (-> state
+      ;; TODO just put bombs in this coords map
+      (update-in path-bombs set-conj bomb)
+      (assoc-in (conj path-bombs-by-coordinates coordinates) bomb)))
 
 (defn- millis []
   ;; TODO: Keep a game time in state
   #?(:clj  (System/currentTimeMillis)
      :cljs (.getTime (js/Date.))))
 
-(defn tick-game-time
-  [state]
-  (assoc-in state path-time (millis)))
-
 (defn game-time
   [state]
-  (get-in state path-time))
+  (get-in state path-time-now))
+
+(defn tick-game-time
+  [state]
+  (-> state
+      (assoc-in path-time-previous (game-time state))
+      (assoc-in path-time-now (millis))))
 
 (defn game-time-plus-millis
   [state millis]
   (+ (game-time state) millis))
+
+(defn delta-time
+  [state]
+  ;(log/info "Delta time. Now:" (get-in state path-time-now))
+  ;(log/info "Delta time. Previous:" (get-in state path-time-previous))
+  ;(log/info "Delta time. delta time:" (/ (- (get-in state path-time-now) (get-in state path-time-previous)) 1000))
+  (/ (- (get-in state path-time-now) (get-in state path-time-previous)) 1000))
+
+(defn init-state
+  [map-size tile-size move-pixels-per-second]
+  (-> {}
+      (assoc-in path-gui-info {:map-size map-size
+                               :tile-size tile-size
+                               :move-pixels-per-second move-pixels-per-second})
+      (tick-game-time)))
 
 (defn dissoc-bomb
   [state bomb]
@@ -159,3 +178,9 @@
 (defn dissoc-explosions
   [state explosions]
   (update-in state path-explosions #(apply disj % explosions)))
+
+(defn get-potential-object
+  [state potential-coordinates]
+  (or (get-in state (conj path-bombs-by-coordinates potential-coordinates))
+      (get-in state (conj path-walls-by-coordinates potential-coordinates))
+      (get-in state (conj path-bricks-by-coordinates potential-coordinates))))

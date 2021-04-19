@@ -1,6 +1,7 @@
 (ns game.sprites.core
   (:require [game.db :as db]
-            [medley.core :as medley]))
+            [medley.core :as medley]
+            [taoensso.timbre :as log]))
 
 (defprotocol Sprite
   (render [sprite]))
@@ -50,6 +51,7 @@
 
 (defn coordinates
   [position tile-size]
+  ;(log/info "calculatnig coordinates for " position)
   (-> position
       (update :x quot (:x tile-size))
       (update :y quot (:y tile-size))))
