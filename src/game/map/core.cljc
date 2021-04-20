@@ -16,23 +16,21 @@
     w = wall
     p = spawn locations of players 1 -4
     f = free space"
-  (->> #_["ww"
-          "ww"]
-    ["wwwwwwwwwwwwwww"
-     "wpf         ffw"
-     "wfw w w w w wfw"
-     "w             w"
-     "w w w w w w w w"
-     "w             w"
-     "w w w w w w w w"
-     "w             w"
-     "w w w w w w w w"
-     "w             w"
-     "wfw w w w w wfw"
-     "wff         ffw"
-     "wwwwwwwwwwwwwww"]
-    (map seq)
-    (map (partial map (comp keyword #(when-not (string/blank? %) %) str)))))
+  (->> ["wwwwwwwwwwwwwww"
+        "wpf         ffw"
+        "wfw w w w w wfw"
+        "w             w"
+        "w w w w w w w w"
+        "w             w"
+        "w w w w w w w w"
+        "w             w"
+        "w w w w w w w w"
+        "w             w"
+        "wfw w w w w wfw"
+        "wff         fpw"
+        "wwwwwwwwwwwwwww"]
+       (map seq)
+       (map (partial map (comp keyword #(when-not (string/blank? %) %) str)))))
 
 (def tiles-wide (count (first basic-map)))
 (def tiles-high (count basic-map))
@@ -89,7 +87,7 @@
 
 (defn one-in
   [n]
-  (fn [_] (zero? (rand-int 4))))
+  (fn [_] (zero? (rand-int n))))
 
 (defn bricks [state]
   (let [{:keys [tile-size]} (db/gui-info state)]
@@ -168,11 +166,11 @@
         explosions (db/explosions state)
         extinguished-explosions (filter #(< (:extinguishes-at %) current-time) explosions)]
     (-> state
-        (kill-players explosions)
         (move-players)
         (power-up-players)
-        ;; TODO: Bombs should make other bombs explode
         (explode-bombs exploded-bombs)
+        ;; TODO: Bombs should make other bombs explode
         (destroy-bricks explosions)
         (lay-bombs)
+        (kill-players explosions)
         (db/dissoc-explosions extinguished-explosions))))

@@ -5,7 +5,8 @@
             [game.sprites.player :as player]
             [quil.core :as q :include-macros true]
             [quil.middleware :as m]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [medley.core :as medley]))
 
 (defn setup []
   (q/frame-rate 30)
@@ -17,7 +18,8 @@
         (db/assoc-bricks bricks)
         (db/assoc-bomb-power-ups bomb-power-ups)
         (db/assoc-speed-power-ups speed-power-ups)
-        (db/assoc-players players))))
+        (db/assoc-players players)
+        (db/start-game))))
 
 (defn render
   [sprites]
@@ -27,25 +29,24 @@
 (defn draw-state [state]
   (q/set-image 0 0 (db/background-image state))
   (let [bricks (db/bricks state)
-        players (vals (db/players state))
+        players (db/players state)
         bombs (db/bombs state)
         bomb-power-ups (db/bomb-power-ups state)
         speed-power-ups (db/speed-power-ups state)
-        explosions (db/explosions state)]
+        explosions (db/explosions state)
+        game-phase (db/game-phase state)]
     (render bomb-power-ups)
     (render speed-power-ups)
     (render bricks)
     (render bombs)
-    (render players)
+    (render (vals players))
     (render explosions)))
 
 (defn key-pressed
   [state key-details]
   (if-let [key (-> key-details :key player/relevant-keys)]
     (db/assoc-key-pressed state key)
-    (do
-      ;(log/info "Current state:" (:players state))
-      state)))
+    state))
 
 (defn key-released
   [state key-details]

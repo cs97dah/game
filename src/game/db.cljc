@@ -1,5 +1,6 @@
 (ns game.db
-  (:require [taoensso.timbre :as log]))
+  (:require [taoensso.timbre :as log]
+            [medley.core :as medley]))
 
 (def path-gui-info [:gui])
 (def path-background-image (conj path-gui-info :background-image))
@@ -18,6 +19,7 @@
 (def path-time [:time])
 (def path-time-now (conj path-time :now))
 (def path-time-previous (conj path-time :previous))
+(def path-game-state [:game-state])
 
 (defn gui-info
   [state]
@@ -125,7 +127,21 @@
 
 (defn player-dead
   [state player-id]
-  (update-in state (path-player-id player-id) assoc :dead? true))
+  (let [state (update-in state (path-player-id player-id) assoc :dead? true)
+        remaining-players (->> (get-in state path-players)
+                               (vals)
+                               (remove :dead?))]
+    (if (empty? remaining-players)
+      (log/info "Draw")
+      (if (nil? (second remaining-players))
+        (log/info "Player"(:player-id (first remaining-players)) "wins")))
+
+    (cond-> state
+      (empty? remaining-players)
+      (update-in path-game-state assoc :running? false :state :draw)
+
+      (nil? (second remaining-players))
+      (update-in path-game-state assoc :running? false :state :win :winner (:player-id (first remaining-players))))))
 
 (defn bomb-power-up
   [state player-id]
@@ -167,9 +183,6 @@
 
 (defn delta-time
   [state]
-  ;(log/info "Delta time. Now:" (get-in state path-time-now))
-  ;(log/info "Delta time. Previous:" (get-in state path-time-previous))
-  ;(log/info "Delta time. delta time:" (/ (- (get-in state path-time-now) (get-in state path-time-previous)) 1000))
   (/ (- (get-in state path-time-now) (get-in state path-time-previous)) 1000))
 
 (defn init-state
@@ -203,3 +216,23 @@
   (or (get-in state (conj path-bombs-by-coordinates potential-coordinates))
       (get-in state (conj path-walls-by-coordinates potential-coordinates))
       (get-in state (conj path-bricks-by-coordinates potential-coordinates))))
+
+(defn start-game
+  [state]
+  (assoc-in state path-game-state {:running true}))
+
+(defn game-phase
+  [state]
+  (get-in state path-game-state)
+  #_(let [remaining-players (->> (get-in state path-players)
+                     (medley/filter-vals (complement :dead?)))
+        num-remaining-players (count remaining-players)]
+    (cond
+      (> num-remaining-players 1)
+      [:running]
+
+      (= 1 num-remaining-players)
+      [:game-won (-> remaining-players keys first)]
+
+      (zero? num-remaining-players)
+      [:game-draw])))

@@ -9,14 +9,21 @@
             [taoensso.timbre :as log]))
 
 (def player-colours
-  {0 (gui/colour :red)})
+  {0 (gui/colour :red)
+   1 (gui/colour :yellow)})
 
 (def player-keys
   {0 {:ArrowUp :up
       :ArrowDown :down
       :ArrowLeft :left
       :ArrowRight :right
-      :space :bomb}})
+      :space :bomb}
+
+   1 {:a :up
+      :z :down
+      :d :left
+      :f :right
+      :x :bomb}})
 
 (def keys-for-player (->> player-keys
                           (medley/map-vals #(-> % keys set))))
@@ -123,8 +130,9 @@
     (- (-> potential-object :position :x) (+ (:x position) (:x size)))))
 
 (defn move-player
-  [state {:keys [player-id speed-multiplier position size] :as player}]
-  (if-let [directions (player-directions state player-id)]
+  [state {:keys [player-id speed-multiplier position size dead?] :as player}]
+  (if-let [directions (and (not dead?)
+                           (player-directions state player-id))]
     (let [direction-map (->> directions
                              (map move-vectors)
                              (apply merge-with +))          ;; TODO: Could be net zero - no need to recalculate this in which case
@@ -205,9 +213,10 @@
         (db/dissoc-key-pressed (bomb-key-for-player player-id)))))
 
 (defn lay-bomb
-  [state {:keys [player-id] :as player}]
+  [state {:keys [player-id dead?] :as player}]
   (cond-> state
-    (laying-bomb? state player-id)
+    (and (not dead?)
+         (laying-bomb? state player-id))
     (lay-bomb* player)))
 
 (defn remove-if-dead
