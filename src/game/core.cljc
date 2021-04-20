@@ -4,9 +4,7 @@
             [game.sprites.core :as sprites]
             [game.sprites.player :as player]
             [quil.core :as q :include-macros true]
-            [quil.middleware :as m]
-            [taoensso.timbre :as log]
-            [medley.core :as medley]))
+            [quil.middleware :as m]))
 
 (defn init-state []
   (let [state (db/init-state map/board-size map/tile-size map/move-pixels-per-second)

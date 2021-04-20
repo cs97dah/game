@@ -4,12 +4,11 @@
             [game.gui :as gui]
             [game.sprites.bomb :as bomb]
             [game.sprites.bomb-power-up :as bomb-power-up]
-            [game.sprites.speed-power-up :as speed-power-up]
             [game.sprites.brick :as brick]
             [game.sprites.player :as player]
+            [game.sprites.speed-power-up :as speed-power-up]
             [game.sprites.wall :as wall]
-            [quil.core :as q]
-            [taoensso.timbre :as log]))
+            [quil.core :as q]))
 
 (def basic-map
   "Key:

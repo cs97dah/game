@@ -5,8 +5,7 @@
             [game.sprites.bomb :as bomb]
             [game.sprites.core :as sprites]
             [medley.core :as medley]
-            [quil.core :as q]
-            [taoensso.timbre :as log]))
+            [quil.core :as q]))
 
 (def player-colours
   {0 (gui/colour :red)
