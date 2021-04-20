@@ -8,8 +8,7 @@
             [taoensso.timbre :as log]
             [medley.core :as medley]))
 
-(defn setup []
-  (q/frame-rate 30)
+(defn init-state []
   (let [state (db/init-state map/board-size map/tile-size map/move-pixels-per-second)
         {:keys [background-image walls bricks bomb-power-ups players speed-power-ups]} (map/initial-state state)]
     (-> state
@@ -18,23 +17,26 @@
         (db/assoc-bricks bricks)
         (db/assoc-bomb-power-ups bomb-power-ups)
         (db/assoc-speed-power-ups speed-power-ups)
-        (db/assoc-players players)
-        (db/start-game))))
+        (db/assoc-players players))))
+
+(defn setup []
+  (q/frame-rate 30)
+  (db/assoc-game-state {} :menu))
 
 (defn render
   [sprites]
   (doseq [sprite sprites]
     (sprites/render sprite)))
 
-(defn draw-state [state]
+(defn draw-game
+  [state]
   (q/set-image 0 0 (db/background-image state))
   (let [bricks (db/bricks state)
         players (db/players state)
         bombs (db/bombs state)
         bomb-power-ups (db/bomb-power-ups state)
         speed-power-ups (db/speed-power-ups state)
-        explosions (db/explosions state)
-        game-phase (db/game-phase state)]
+        explosions (db/explosions state)]
     (render bomb-power-ups)
     (render speed-power-ups)
     (render bricks)
@@ -42,11 +44,44 @@
     (render (vals players))
     (render explosions)))
 
+(defn draw-menu []
+  (q/background 255)
+  (q/fill 0)
+  (q/text "Computer game. Press any key to start." 10 30))
+
+(defn draw-result [state]
+  (q/fill 0)
+  (let [winner (db/winner state)]
+    (q/text (str "Game over. " winner " Press any key to return to the menu.") 10 30)))
+
+(defn draw-state
+  [state]
+  (case (db/game-state state)
+    :running
+    (draw-game state)
+
+    :menu
+    (draw-menu)
+
+    :game-over
+    (do
+      (draw-game state)
+      (draw-result state))))
+
 (defn key-pressed
   [state key-details]
-  (if-let [key (-> key-details :key player/relevant-keys)]
-    (db/assoc-key-pressed state key)
-    state))
+  (case (db/game-state state)
+    :running
+    (if-let [key (-> key-details :key player/relevant-keys)]
+      (db/assoc-key-pressed state key)
+      state)
+
+    :menu
+    (-> (init-state)
+        (db/assoc-game-state :running))
+
+    :game-over
+    (db/assoc-game-state {} :menu)))
 
 (defn key-released
   [state key-details]

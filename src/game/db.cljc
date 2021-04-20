@@ -125,23 +125,19 @@
   [state player-id]
   (get-in state (path-player-id player-id)))
 
+(defn assoc-game-state
+  [state game-state]
+  (assoc-in state path-game-state game-state))
+
 (defn player-dead
   [state player-id]
   (let [state (update-in state (path-player-id player-id) assoc :dead? true)
         remaining-players (->> (get-in state path-players)
                                (vals)
                                (remove :dead?))]
-    (if (empty? remaining-players)
-      (log/info "Draw")
-      (if (nil? (second remaining-players))
-        (log/info "Player"(:player-id (first remaining-players)) "wins")))
-
     (cond-> state
-      (empty? remaining-players)
-      (update-in path-game-state assoc :running? false :state :draw)
-
       (nil? (second remaining-players))
-      (update-in path-game-state assoc :running? false :state :win :winner (:player-id (first remaining-players))))))
+      (assoc-game-state :game-over))))
 
 (defn bomb-power-up
   [state player-id]
@@ -217,22 +213,16 @@
       (get-in state (conj path-walls-by-coordinates potential-coordinates))
       (get-in state (conj path-bricks-by-coordinates potential-coordinates))))
 
-(defn start-game
+(defn game-state
   [state]
-  (assoc-in state path-game-state {:running true}))
+  (get-in state path-game-state))
 
-(defn game-phase
+(defn winner
   [state]
-  (get-in state path-game-state)
-  #_(let [remaining-players (->> (get-in state path-players)
-                     (medley/filter-vals (complement :dead?)))
-        num-remaining-players (count remaining-players)]
-    (cond
-      (> num-remaining-players 1)
-      [:running]
-
-      (= 1 num-remaining-players)
-      [:game-won (-> remaining-players keys first)]
-
-      (zero? num-remaining-players)
-      [:game-draw])))
+  (log/info "(get-in state path-players)" (get-in state path-players))
+  (let [remaining-players (->> (get-in state path-players)
+                               (vals)
+                               (remove :dead?))]
+    (if (empty? remaining-players)
+      "It was a draw!"
+      (str "Player " (-> remaining-players first :player-id inc) " wins!"))))
