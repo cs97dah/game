@@ -76,34 +76,76 @@
 
 (defn coordinates-to-measure-from
   [{:keys [position size] :as player} direction tile-size]
-  (sprites/coordinates
-    (case direction
-      (:up :left) position
-      (merge-with + position size {:x -1 :y -1}))
-    tile-size))
+  (let [{:keys [x y]} (merge-with + size {:x -1 :y -1})
+        plus-x (partial merge-with + {:x x})
+        plus-y (partial merge-with + {:y y})]
+    ;; We may need two sets of coordinates because the sprite might be over the
+    ;; boundary of two coordinates
+    (->> (case direction
+           :up [position (plus-x position)]
+           :down [(plus-y position) (plus-y (plus-x position))]
+           :left [position (plus-y position)]
+           :right [(plus-x position) (plus-y (plus-x position))])
+         (map #(sprites/coordinates % tile-size)))))
 
 (defn player-directions
   [state player-id]
   (let [directions (disj (player-commands state player-id) :bomb)]
     (not-empty
       (cond-> directions
-       (and (:up directions)
-            (:down directions))
-       (disj :up :down)
+        (and (:up directions)
+             (:down directions))
+        (disj :up :down)
 
-       (and (:left directions)
-            (:right directions))
-       (disj :left :right)))))
+        (and (:left directions)
+             (:right directions))
+        (disj :left :right)))))
 
 (defn abs
   [x]
   (cond-> x
     (neg? x)
     (* -1)))
+#_
+(defn calculate-object-distance
+  [potential-object-distances direction position size potential-object]
+  (let [potential-object-distances
+        (case direction
+          :up
+          (assoc potential-object-distances :y (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y))))
+
+          :down
+          (assoc potential-object-distances :y (- (-> potential-object :position :y) (+ (:y position) (:y size) #_-1)))
+
+          :left
+          (assoc potential-object-distances :x (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x))))
+
+          :right
+          (assoc potential-object-distances :x (- (-> potential-object :position :x) (+ (:x position) (:x size) #_-1))))]
+    ; (log/info "potential-object-distances" potential-object-distances)
+    potential-object-distances))
+
+(defn calculate-object-distance-2
+  [direction position size potential-object]
+  (let [r
+        (case direction
+          :up
+          (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y)))
+
+          :down
+          (- (-> potential-object :position :y) (+ (:y position) (:y size)))
+
+          :left
+          (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x)))
+
+          :right
+          (- (-> potential-object :position :x) (+ (:x position) (:x size))))]
+    (log/info "calculate-object-distance-2" r)
+    r))
 
 (defn move-player
   [state {:keys [player-id speed-multiplier position size] :as player}]
-  (if-let [directions (player-directions state player-id) ]
+  (if-let [directions (player-directions state player-id)]
     (let [direction-map (->> directions
                              (map move-vectors)
                              (apply merge-with +))          ;; TODO: Could be net zero - no need to recalculate this in which case
@@ -111,35 +153,24 @@
           {:keys [tile-size]} (db/gui-info state)
           potential-object-distances (reduce (fn [potential-object-distances direction]
                                                (let [coordinates (coordinates-to-measure-from player direction tile-size)
-                                                     potential-coordinates (merge-with + coordinates (get move-vectors direction))
-                                                     potential-object (db/get-potential-object state potential-coordinates)]
+                                                     potential-coordinates (map #(merge-with + % (get move-vectors direction)) coordinates)
+                                                     potential-objects (seq (remove nil? (map #(db/get-potential-object state %) potential-coordinates)))]
                                                  ;(log/info "My coordinates" coordinates)
                                                  ;(log/info "My potential-coordinates" potential-coordinates)
-                                                 ;(log/info "My potential-blocking-object" (db/get-potential-object state potential-coordinates))
+                                                 (log/info "potential-objects" (into [] potential-objects))
                                                  ;  (medley/assoc-some potential-objects direction potential-object)
-                                                 (if-not potential-object
+                                                 (if-not potential-objects
                                                    potential-object-distances
-                                                   (do
-                                                     ;(log/info "My position + size" position size)
-                                                     ;(log/info "My coordinates" coordinates)
-                                                     ;(log/info "potential-object" potential-object)
-                                                     (let [potential-object-distances
-                                                           (case direction
-                                                             :up
-                                                             (assoc potential-object-distances :y (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y) #_ -1)))
-
-                                                             :down
-                                                             (assoc potential-object-distances :y (- (-> potential-object :position :y) (+ (:y position) (:y size)#_ -1)))
-
-                                                             :left
-                                                             (assoc potential-object-distances :x (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x)#_ -1)))
-
-                                                             :right
-                                                             (assoc potential-object-distances :x (- (-> potential-object :position :x) (+ (:x position) (:x size) #_-1))))]
-                                                       ; (log/info "potential-object-distances" potential-object-distances)
-                                                       potential-object-distances)))))
+                                                   (let [potential-object-distance (->> potential-objects
+                                                                                        (map #(calculate-object-distance-2 direction position size %))
+                                                                                        (apply min))]
+                                                     (case direction
+                                                       (:up :down)
+                                                       (assoc potential-object-distances :y potential-object-distance)
+                                                       (assoc potential-object-distances :x potential-object-distance))))))
                                              nil directions)
           {:keys [move-pixels-per-second]} (db/gui-info state)
+          _ (log/info "potential-object-distances"potential-object-distances)
           ;_ (log/info  "move-pixels-per-second"move-pixels-per-second )
           ;_ (log/info   "speed-multiplier"speed-multiplier )
           ;_ (log/info  "(db/delta-time state)"(db/delta-time state))
