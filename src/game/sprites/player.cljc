@@ -106,42 +106,21 @@
   (cond-> x
     (neg? x)
     (* -1)))
-#_
-(defn calculate-object-distance
-  [potential-object-distances direction position size potential-object]
-  (let [potential-object-distances
-        (case direction
-          :up
-          (assoc potential-object-distances :y (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y))))
-
-          :down
-          (assoc potential-object-distances :y (- (-> potential-object :position :y) (+ (:y position) (:y size) #_-1)))
-
-          :left
-          (assoc potential-object-distances :x (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x))))
-
-          :right
-          (assoc potential-object-distances :x (- (-> potential-object :position :x) (+ (:x position) (:x size) #_-1))))]
-    ; (log/info "potential-object-distances" potential-object-distances)
-    potential-object-distances))
 
 (defn calculate-object-distance-2
   [direction position size potential-object]
-  (let [r
-        (case direction
-          :up
-          (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y)))
+  (case direction
+    :up
+    (- (:y position) (+ (-> potential-object :position :y) (-> potential-object :size :y)))
 
-          :down
-          (- (-> potential-object :position :y) (+ (:y position) (:y size)))
+    :down
+    (- (-> potential-object :position :y) (+ (:y position) (:y size)))
 
-          :left
-          (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x)))
+    :left
+    (- (:x position) (+ (-> potential-object :position :x) (-> potential-object :size :x)))
 
-          :right
-          (- (-> potential-object :position :x) (+ (:x position) (:x size))))]
-    (log/info "calculate-object-distance-2" r)
-    r))
+    :right
+    (- (-> potential-object :position :x) (+ (:x position) (:x size)))))
 
 (defn move-player
   [state {:keys [player-id speed-multiplier position size] :as player}]
@@ -149,16 +128,11 @@
     (let [direction-map (->> directions
                              (map move-vectors)
                              (apply merge-with +))          ;; TODO: Could be net zero - no need to recalculate this in which case
-          ;_ (log/info "Request to move in direction" direction)
           {:keys [tile-size]} (db/gui-info state)
           potential-object-distances (reduce (fn [potential-object-distances direction]
                                                (let [coordinates (coordinates-to-measure-from player direction tile-size)
                                                      potential-coordinates (map #(merge-with + % (get move-vectors direction)) coordinates)
                                                      potential-objects (seq (remove nil? (map #(db/get-potential-object state %) potential-coordinates)))]
-                                                 ;(log/info "My coordinates" coordinates)
-                                                 ;(log/info "My potential-coordinates" potential-coordinates)
-                                                 (log/info "potential-objects" (into [] potential-objects))
-                                                 ;  (medley/assoc-some potential-objects direction potential-object)
                                                  (if-not potential-objects
                                                    potential-object-distances
                                                    (let [potential-object-distance (->> potential-objects
@@ -170,10 +144,6 @@
                                                        (assoc potential-object-distances :x potential-object-distance))))))
                                              nil directions)
           {:keys [move-pixels-per-second]} (db/gui-info state)
-          _ (log/info "potential-object-distances"potential-object-distances)
-          ;_ (log/info  "move-pixels-per-second"move-pixels-per-second )
-          ;_ (log/info   "speed-multiplier"speed-multiplier )
-          ;_ (log/info  "(db/delta-time state)"(db/delta-time state))
           straight-line-distance (* move-pixels-per-second speed-multiplier (db/delta-time state))
           ideal-move-map (if (or (zero? (:x direction-map))
                                  (zero? (:y direction-map)))

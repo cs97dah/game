@@ -42,7 +42,7 @@
 (def board-size (-> tile-size
                     (update :x * tiles-wide)
                     (update :y * tiles-high)))
-(def move-pixels-per-second (:x tile-size))
+(def move-pixels-per-second 120)
 
 (defn paint-wall
   [background-image {:keys [size position] :as wall}]
