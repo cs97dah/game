@@ -7,13 +7,16 @@
                  [duct/module.cljs "0.4.1"]
                  [duct/module.logging "0.5.0"]
                  [duct/module.web "0.7.2"]
+                 [duct/server.http.http-kit "0.1.4"]
 
                  [quil "3.1.0"]
                  [medley "1.3.0"]
                  [com.taoensso/timbre "5.1.2"]
                  [com.taoensso/sente "1.16.2"]
                  [http-kit "2.5.3"]
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+
+                 ]
   :plugins [[duct/lein-duct "0.12.2"]]
   :main ^:skip-aot game.main
   :resource-paths ["resources" "target/resources"]

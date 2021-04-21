@@ -2,16 +2,19 @@
  {:duct.core/project-ns game
 
   :duct.router/cascading
-  [#ig/ref [:game.handler/game]]
+  [#ig/ref [:game.handler/game]
+   #ig/ref [:game.handler.websocket/websockets]]
 
-  :game.handler/game {}}
+  :game.handler/game {}
+  :game.handler.websocket/websockets {}
 
- :duct.profile/dev   #duct/include "dev"
+  :duct.server.http/http-kit {:port 3000
+                              :handler #ig/ref :duct.router/cascading}}
+
+ :duct.profile/dev #duct/include "dev"
  :duct.profile/local #duct/include "local"
- :duct.profile/prod  {}
+ :duct.profile/prod {}
 
  :duct.module/logging {}
- :duct.module/cljs
- {:main game.client}
- :duct.module.web/site
- {}}
+ :duct.module/cljs {:main game.client}
+ :duct.module.web/site {}}
