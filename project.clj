@@ -1,36 +1,31 @@
 (defproject game "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.10.1"]
-                 [quil "3.1.0"]
-                 [org.clojure/clojurescript "1.10.520"]
+  :min-lein-version "2.0.0"
+  :dependencies [[org.clojure/clojure "1.10.3"]
+                 [duct/core "0.8.0"]
+                 [duct/module.cljs "0.4.1"]
+                 [duct/module.logging "0.5.0"]
+                 [duct/module.web "0.7.2"]
 
+                 [quil "3.1.0"]
                  [medley "1.3.0"]
                  [com.taoensso/timbre "4.10.0"]]
-
-  :plugins [[lein-cljsbuild "1.1.7"]
-            [lein-figwheel "0.5.19"]]
-  :hooks [leiningen.cljsbuild]
-
-  :clean-targets ^{:protect false} ["resources/public/js"]
-  :cljsbuild
-  {:builds [; development build with figwheel hot swap
-            {:id "development"
-             :source-paths ["src"]
-             :figwheel true
-             :compiler
-             {:main "game.core"
-              :output-to "resources/public/js/main.js"
-              :output-dir "resources/public/js/development"
-              :asset-path "js/development"}}
-            ; minified and bundled build for deployment
-            {:id "optimized"
-             :source-paths ["src"]
-             :compiler
-             {:main "game.core"
-              :output-to "resources/public/js/main.js"
-              :output-dir "resources/public/js/optimized"
-              :asset-path "js/optimized"
-              :optimizations :advanced}}]})
+  :plugins [[duct/lein-duct "0.12.2"]]
+  :main ^:skip-aot game.main
+  :resource-paths ["resources" "target/resources"]
+  :prep-tasks     ["javac" "compile" ["run" ":duct/compiler"]]
+  :middleware     [lein-duct.plugin/middleware]
+  :profiles
+  {:dev  [:project/dev :profiles/dev]
+   :repl {:prep-tasks   ^:replace ["javac" "compile"]
+          :dependencies [[cider/piggieback "0.5.2"]]
+          :repl-options {:init-ns user, :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
+   :uberjar {:aot :all}
+   :profiles/dev {}
+   :project/dev  {:source-paths   ["dev/src"]
+                  :resource-paths ["dev/resources"]
+                  :dependencies   [[integrant/repl "0.3.2"]
+                                   [hawk "0.2.11"]
+                                   [eftest "0.5.9"]
+                                   [kerodon "0.9.1"]]}})

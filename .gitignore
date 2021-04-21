@@ -12,5 +12,7 @@ figwheel_server.log
 .DS_Store
 *.iml
 .idea 
-resources
-
+.dir-locals.el
+logs
+profiles.clj
+l

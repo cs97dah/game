@@ -1,20 +1,82 @@
-# minimal-quil
+# game
 
-A Quil sketch designed to ... well, that part is up to you.
+FIXME: description
 
-## Usage
+## Developing
 
-Run `lein figwheel` in your terminal. Wait for a while until you see `Successfully compiled "resources/public/js/main.js"`. Open [localhost:3449](http://localhost:3449) in your browser.
+### Setup
 
-You can use this while developing your sketch. Whenever you save your source files the browser will automatically refresh everything, providing you with quick feedback. For more information about Figwheel, check the [Figwheel repository on GitHub](https://github.com/bhauman/lein-figwheel).
+When you first clone this repository, run:
 
-## Publishing your sketch
+```sh
+lein duct setup
+```
 
-Before you publish your sketch, run `lein do clean, cljsbuild once optimized`. This will compile your code and run Google Closure Compiler with advanced optimizations. Take `resources/public/index.html` and `resources/public/js/main.js` and upload them to server of your choice.
+This will create files for local configuration, and prep your system
+for the project.
 
-## License
+### Environment
 
-Copyright © 2017 FIXME
+To begin developing, start with a REPL.
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+```sh
+lein repl
+```
+
+Then load the development environment.
+
+```clojure
+user=> (dev)
+:loaded
+```
+
+Run `go` to prep and initiate the system.
+
+```clojure
+dev=> (go)
+:duct.server.http.jetty/starting-server {:port 3000}
+:initiated
+```
+
+By default this creates a web server at <http://localhost:3000>.
+
+When you make changes to your source files, use `reset` to reload any
+modified files and reset the server. Changes to CSS or ClojureScript
+files will be hot-loaded into the browser.
+
+```clojure
+dev=> (reset)
+:reloading (...)
+:resumed
+```
+
+If you want to access a ClojureScript REPL, make sure that the site is loaded
+in a browser and run:
+
+```clojure
+dev=> (cljs-repl)
+Waiting for browser connection... Connected.
+To quit, type: :cljs/quit
+nil
+cljs.user=>
+```
+
+### Testing
+
+Testing is fastest through the REPL, as you avoid environment startup
+time.
+
+```clojure
+dev=> (test)
+...
+```
+
+But you can also run tests through Leiningen.
+
+```sh
+lein test
+```
+
+## Legal
+
+Copyright © 2021 FIXME
