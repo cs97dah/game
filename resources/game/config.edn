@@ -2,13 +2,17 @@
  {:duct.core/project-ns game
 
   :duct.router/cascading
-  [#ig/ref [:game.handler/game]]
+  [#ig/ref [:game.handler/game]
+   ; #ig/ref [:game.handler.websockets/websockets]
+   ]
 
-  :game.handler/game {}}
+  :game.handler/game {}
+  ; :game.handler.websockets/websockets {}
+  }
 
- :duct.profile/dev   #duct/include "dev"
+ :duct.profile/dev #duct/include "dev"
  :duct.profile/local #duct/include "local"
- :duct.profile/prod  {}
+ :duct.profile/prod {}
 
  :duct.module/logging {}
  :duct.module/cljs
