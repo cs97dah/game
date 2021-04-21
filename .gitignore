@@ -13,4 +13,7 @@ figwheel_server.log
 *.iml
 .idea 
 resources
-
+.dir-locals.el
+logs
+profiles.clj
+l
