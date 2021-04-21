@@ -29,3 +29,6 @@
   (load "local"))
 
 (integrant.repl/set-prep! #(duct/prep-config (read-config) profiles))
+
+;; To run this app, compile this namespace then run (go)
+;; Run (reset) to reload

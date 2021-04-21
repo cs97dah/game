@@ -1,3 +1,4 @@
-(ns game.client)
+(ns game.client
+  (:require [game.core :as game]))
 
-(js/console.log "FIXME")
+(game/run-sketch)

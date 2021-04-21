@@ -2,9 +2,9 @@
  {:duct.core/project-ns game
 
   :duct.router/cascading
-  [#ig/ref [:game.handler/example]]
+  [#ig/ref [:game.handler/game]]
 
-  :game.handler/example {}}
+  :game.handler/game {}}
 
  :duct.profile/dev   #duct/include "dev"
  :duct.profile/local #duct/include "local"
