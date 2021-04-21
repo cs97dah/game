@@ -85,10 +85,10 @@
   [state key-details]
   (db/dissoc-key-pressed state (:key key-details)))
 
-; this function is called in index.html
+; this function is called from client.cljs
 (defn ^:export run-sketch []
   (q/defsketch game
-               :host "game"
+               :host "game-div"
                :size [(:x map/board-size) (:y map/board-size)]
                ; setup function called only once, during sketch initialization.
                :setup setup
